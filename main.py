@@ -208,17 +208,17 @@ async def start_command(bot: Client, message: Message):
 
 # Stop command handler
 @bot.on_message(filters.command("stop2"))
-async def restart_handler(_, m: Message):
-    await m.reply_text("**𝗦𝘁𝗼𝗽𝗽𝗲𝗱**🚦", True)
+async def restart_handler(_, msg: Message):
+    await msg.reply_text("**𝗦𝘁𝗼𝗽𝗽𝗲𝗱**🚦", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 @bot.on_message(filters.command("restart2"))
-async def restart_handler(_, m):
-    if not is_authorized(m.from_user.id):
-        await m.reply_text("**🚫 You are not authorized to use this command.**")
+async def restart_handler(_, msg):
+    if not is_authorized(msg.from_user.id):
+        await msg.reply_text("**🚫 You are not authorized to use this command.**")
         return
-    await m.reply_text("🔮Restarted🔮", True)
+    await msg.reply_text("🔮Restarted🔮", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
@@ -264,7 +264,7 @@ async def upload(bot: Client, msg: Message):
     else:
         x = y
     
-    path = f"./downloads/{m.chat.id}"
+    path = f"./downloads/{msg.chat.id}"
     
     pdf_count = 0
     img_count = 0
@@ -291,13 +291,13 @@ async def upload(bot: Client, msg: Message):
                     video_count += 1
         os.remove(x)
     except:
-        await m.reply_text("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
+        await msg.reply_text("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
         os.remove(x)
         return
     
     await editable.edit(f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n🔹Img : {img_count}  🔹Pdf : {pdf_count}\n🔹Zip : {zip_count}  🔹Video : {video_count}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`")
     
-    input0 = await wait_for_message(m.chat.id)
+    input0 = await wait_for_message(msg.chat.id)
     if not input0:
         await editable.edit("**🚫 No input received. Process cancelled.**")
         return
@@ -309,7 +309,7 @@ async def upload(bot: Client, msg: Message):
         arg = 1
     
     await editable.edit("📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠")
-    input1 = await wait_for_message(m.chat.id)
+    input1 = await wait_for_message(msg.chat.id)
     if not input1:
         await editable.edit("**🚫 No input received. Process cancelled.**")
         return
@@ -321,7 +321,7 @@ async def upload(bot: Client, msg: Message):
         b_name = raw_text0
     
     await editable.edit("**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`")
-    input2 = await wait_for_message(m.chat.id)
+    input2 = await wait_for_message(msg.chat.id)
     if not input2:
         await editable.edit("**🚫 No input received. Process cancelled.**")
         return
@@ -346,7 +346,7 @@ async def upload(bot: Client, msg: Message):
         res = "UN"
     
     await editable.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
-    input3 = await wait_for_message(m.chat.id)
+    input3 = await wait_for_message(msg.chat.id)
     if not input3:
         await editable.edit("**🚫 No input received. Process cancelled.**")
         return
@@ -365,7 +365,7 @@ async def upload(bot: Client, msg: Message):
         CR = credit
     
     await editable.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
-    input4 = await wait_for_message(m.chat.id)
+    input4 = await wait_for_message(msg.chat.id)
     if not input4:
         await editable.edit("**🚫 No input received. Process cancelled.**")
         return
@@ -377,7 +377,7 @@ async def upload(bot: Client, msg: Message):
         MR = raw_text4
     
     await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼")
-    input6 = await wait_for_message(m.chat.id)
+    input6 = await wait_for_message(msg.chat.id)
     if not input6:
         await editable.edit("**🚫 No input received. Process cancelled.**")
         return
@@ -564,13 +564,13 @@ async def upload(bot: Client, msg: Message):
                     try:
                         ka = await helper.download(url, name)
                         copy = await bot.send_document(
-                            chat_id=m.chat.id, document=ka, caption=cc1
+                            chat_id=msg.chat.id, document=ka, caption=cc1
                         )
                         count += 1
                         os.remove(ka)
                         time.sleep(1)
                     except FloodWait as e:
-                        await m.reply_text(str(e))
+                        await msg.reply_text(str(e))
                         time.sleep(e.x)
                         continue
 
@@ -580,12 +580,12 @@ async def upload(bot: Client, msg: Message):
                         download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                         os.system(download_cmd)
                         copy = await bot.send_document(
-                            chat_id=m.chat.id, document=f"{name}.zip", caption=cczip
+                            chat_id=msg.chat.id, document=f"{name}.zip", caption=cczip
                         )
                         count += 1
                         os.remove(f"{name}.zip")
                     except FloodWait as e:
-                        await m.reply_text(str(e))
+                        await msg.reply_text(str(e))
                         time.sleep(e.x)
                         count += 1
                         pass
@@ -595,7 +595,7 @@ async def upload(bot: Client, msg: Message):
                     url = url.split("*")[0]
                     pdf_enc = await helper.download_and_decrypt_pdf(url, name, pdf_key)
                     copy = await bot.send_document(
-                        chat_id=m.chat.id, document=pdf_enc, caption=cc1
+                        chat_id=msg.chat.id, document=pdf_enc, caption=cc1
                     )
                     count += 1
                     os.remove(pdf_enc)
@@ -622,19 +622,19 @@ async def upload(bot: Client, msg: Message):
                             # Send the PDF document
                             await asyncio.sleep(4)
                             copy = await bot.send_document(
-                                chat_id=m.chat.id, document=f"{name}.pdf", caption=cc1
+                                chat_id=msg.chat.id, document=f"{name}.pdf", caption=cc1
                             )
                             count += 1
 
                             # Remove the PDF file after sending
                             os.remove(f"{name}.pdf")
                         else:
-                            await m.reply_text(
+                            await msg.reply_text(
                                 f"Failed to download PDF: {response.status_code} {response.reason}"
                             )
 
                     except FloodWait as e:
-                        await m.reply_text(str(e))
+                        await msg.reply_text(str(e))
                         time.sleep(e.x)
                         continue
 
@@ -648,7 +648,7 @@ async def upload(bot: Client, msg: Message):
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
                             copy = await bot.send_document(
-                                chat_id=m.chat.id, document=f"{name}.pdf", caption=cc1
+                                chat_id=msg.chat.id, document=f"{name}.pdf", caption=cc1
                             )
                             count += 1
                             os.remove(f"{name}.pdf")
@@ -662,14 +662,14 @@ async def upload(bot: Client, msg: Message):
                             # copy = await bot.send_document(chat_id=m.chat.id, document=new_file_path, caption=cc1)
                             os.system(download_cmd)
                             copy = await bot.send_document(
-                                chat_id=m.chat.id, document=f"{name}.pdf", caption=cc1
+                                chat_id=msg.chat.id, document=f"{name}.pdf", caption=cc1
                             )
                             count += 1
                             # os.remove(new_file_path)
                             os.remove(f"{name}.pdf")
 
                     except FloodWait as e:
-                        await m.reply_text(str(e))
+                        await msg.reply_text(str(e))
                         time.sleep(e.x)
                         continue
 
@@ -679,7 +679,7 @@ async def upload(bot: Client, msg: Message):
                             ["wget", url, "-O", f"{name}.jpg"], check=True
                         )  # Fixing this line
                         await bot.send_photo(
-                            chat_id=m.chat.id,
+                            chat_id=msg.chat.id,
                             caption=cimg,
                             photo=f"{name}.jpg",
                         )
@@ -700,11 +700,11 @@ async def upload(bot: Client, msg: Message):
                 elif "youtu" in url:
                     try:
                         await bot.send_photo(
-                            chat_id=m.chat.id, photo=photo, caption=cyt
+                            chat_id=msg.chat.id, photo=photo, caption=cyt
                         )
                         count += 1
                     except Exception as e:
-                        await m.reply_text(str(e))
+                        await msg.reply_text(str(e))
                         await asyncio.sleep(1)
                         continue
 
@@ -716,21 +716,21 @@ async def upload(bot: Client, msg: Message):
                         )
                         time.sleep(1)
                         await bot.send_document(
-                            chat_id=m.chat.id, document=f"{name}.html", caption=cc1
+                            chat_id=msg.chat.id, document=f"{name}.html", caption=cc1
                         )
                         os.remove(f"{name}.html")
                         count += 1
                         time.sleep(5)
                     except FloodWait as e:
                         await asyncio.sleep(e.x)
-                        await m.reply_text(str(e))
+                        await msg.reply_text(str(e))
                         continue
 
                 elif "encrypted.m" in url:
                     emoji_message = await show_random_emojis(message)
                     remaining_links = len(links) - count
                     Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
-                    prog = await m.reply_text(Show)
+                    prog = await msg.reply_text(Show)
                     res_file = await helper.download_and_decrypt_video(
                         url, cmd, name, appxkey
                     )
@@ -747,7 +747,7 @@ async def upload(bot: Client, msg: Message):
                     emoji_message = await show_random_emojis(message)
                     remaining_links = len(links) - count
                     Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
-                    prog = await m.reply_text(Show)
+                    prog = await msg.reply_text(Show)
                     # Use the decrypt_and_merge_video function
                     res_file = await helper.decrypt_and_merge_video(
                         mpd, keys_string, path, name, raw_text2
@@ -765,7 +765,7 @@ async def upload(bot: Client, msg: Message):
                     emoji_message = await show_random_emojis(message)
                     remaining_links = len(links) - count
                     Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
-                    prog = await m.reply_text(Show)
+                    prog = await msg.reply_text(Show)
 
                     res_file = await helper.download_video(url, cmd, name)
                     filename = res_file
@@ -789,8 +789,8 @@ async def upload(bot: Client, msg: Message):
                 continue
 
     except Exception as e:
-        await m.reply_text(e)
-    await m.reply_text(
+        await msg.reply_text(e)
+    await msg.reply_text(
         f"`✨𝗕𝗔𝗧𝗖𝗛 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨\n\n"
         f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
         f"📛𝗜𝗻𝗱𝗲𝘅 𝗥𝗮𝗻𝗴𝗲 » ({raw_text} to {len(links)})\n"
@@ -802,8 +802,8 @@ async def upload(bot: Client, msg: Message):
         f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
         f"✅𝗦𝗧𝗔𝗧𝗨𝗦 » 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗`"
     )
-    await m.reply_text(f"<pre><code>📥𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤『{CR}』</code></pre>")
-    await m.reply_text(f"<pre><code>『😏𝗥𝗲𝗮𝗰𝘁𝗶𝗼𝗻 𝗞𝗼𝗻 𝗗𝗲𝗴𝗮😏』</code></pre>")
+    await msg.reply_text(f"<pre><code>📥𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤『{CR}』</code></pre>")
+    await msg.reply_text(f"<pre><code>『😏𝗥𝗲𝗮𝗰𝘁𝗶𝗼𝗻 𝗞𝗼𝗻 𝗗𝗲𝗴𝗮😏』</code></pre>")
 
 
 bot.run()
