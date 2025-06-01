@@ -777,12 +777,14 @@ async def upload(bot: Client, m: Message):
                     time.sleep(1)
 
             except Exception as e:
-                await m.reply_text(
-                    f"‼️𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗙𝗮𝗶𝗹𝗲𝗱‼️\n\n"
-                    f"📝𝗡𝗮𝗺𝗲 » `{name}`\n\n"
-                    f'🔗𝗨𝗿𝗹 » <a href="{url}">__**Click Here to See Link**__</a>`'
-                )
-
+                error_details = f"‼️𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗙𝗮𝗶𝗹𝗲𝗱‼️\n\n"\
+                   f"📝𝗡𝗮𝗺𝗲 » `{name}`\n\n"\
+                   f"🔗𝗨𝗿𝗹 » {url}\n\n"\
+                   f"⚠️𝗘𝗿𝗿𝗼𝗿 » `{str(e)}`"
+    
+                await m.reply_text(error_details)
+                logging.error(f"Download failed for {name}: {str(e)}")
+    
                 count += 1
                 failed_count += 1
                 continue
