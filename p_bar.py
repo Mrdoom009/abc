@@ -23,7 +23,7 @@ def hrb(value, digits=2, delim="", postfix=""):
     if value is None:
         return None
     chosen_unit = "B"
-    for unit in ("KiB", "MiB", "GiB", "TiB"):
+    for unit in ("ᴋʙ", "ᴍʙ", "ɢʙ", "ᴛʙ"):
         if value > 1000:
             value /= 1024
             chosen_unit = unit
@@ -91,11 +91,11 @@ async def progress_bar(current, total, reply, start):
         bar_length = 10
         completed_length = int(current * bar_length / total)
         remaining_length = bar_length - completed_length
-        progress_bar = "🟢" * completed_length + "🔴" * remaining_length
+        progress_bar = "♦" * completed_length + "♢" * remaining_length
 
         try:
             await reply.edit(
-                f"╭──◈◈◈◈ **Uᴘʟᴏᴀᴅɪɴɢ** ◈◈◈◈──╮\n├⚡ {progress_bar}\n├🚀 Sᴘᴇᴇᴅ ➠ {sp}\n├📛 Dᴏɴᴇ ➠ ({perc}) {cur}/{tot}\n├🕑 Eᴛα ➠ {eta}\n╰─◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈─╯"
+                f"╭──◈◈◈◈ **Uᴘʟᴏᴀᴅɪɴɢ** ◈◈◈◈──╮\n├⚡ {progress_bar}\n├🚀 Sᴘᴇᴇᴅ ➠ {sp}\n├📛 Pʀᴏɢʀᴇss ➠ {perc}\n├📟 ᴅᴏɴᴇ ➠ {cur}/{tot}\n├🕑 Eᴛᴀ ➠ {eta}\n╰─◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈─╯"
             )
         except FloodWait as e:
             time.sleep(e.x)
