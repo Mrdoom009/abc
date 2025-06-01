@@ -318,10 +318,10 @@ async def download_video(url, cmd, name):
         logging.error(f"Exception in download_video for {name}: {str(e)}")
         return None
 
-async def send_doc(bot: Client, m: Message, cc, ka, cc1, count, name):
-    reply = await m.reply_text(f"Uploading - `{name}`")
+async def send_doc(bot: Client, msg: Message, cc, ka, cc1, count, name):
+    reply = await msg.reply_text(f"Uploading - `{name}`")
     try:
-        await m.reply_document(ka, caption=cc1)
+        await msg.reply_document(ka, caption=cc1)
         count += 1
     finally:
         await reply.delete()
@@ -374,7 +374,7 @@ def get_next_emoji():
     return emoji
 
 
-async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
+async def send_vid(bot: Client, msg: Message, cc, filename, thumb, name, prog):
     emoji = get_next_emoji()
     
     # Generate thumbnail asynchronously
@@ -397,7 +397,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
         processing_msg = await m.reply_text(emoji)
 
         try:
-            await m.reply_video(
+            await msg.reply_video(
                 filename,
                 caption=cc,
                 supports_streaming=True,
@@ -409,7 +409,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
                 progress_args=(reply, time.time()),
             )
         except Exception:
-            await m.reply_document(
+            await msg.reply_document(
                 filename,
                 caption=cc,
                 progress=progress_bar,
