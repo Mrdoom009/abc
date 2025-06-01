@@ -81,6 +81,25 @@ def is_authorized(user_id: int) -> bool:
 
 bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
+message_queues = {}
+
+async def wait_for_message(chat_id: int, timeout: int = 300) -> Message:
+    queue = asyncio.Queue()
+    message_queues[chat_id] = queue
+    try:
+        return await asyncio.wait_for(queue.get(), timeout=timeout)
+    except asyncio.TimeoutError:
+        return None
+    finally:
+        if chat_id in message_queues:
+            del message_queues[chat_id]
+
+@bot.on_message(filters.all, group=-1)
+async def message_waiter(_, message: Message):
+    chat_id = message.chat.id
+    if chat_id in message_queues:
+        await message_queues[chat_id].put(message)
+
 # Sudo command to add/remove sudo users
 @bot.on_message(filters.command("sudo"))
 async def sudo_command(bot: Client, message: Message):
@@ -231,32 +250,33 @@ async def help_command(client: Client, msg: Message):
 
 @bot.on_message(filters.command(["tushar2", "upload2"]))
 async def upload(bot: Client, m: Message):
-    input: Message = await bot.ask(
-        m.chat.id,
-        "⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡",
-        filters=filters.document
-    )
-    y = await input.download()
-    await input.delete(True)
+    editable = await m.reply_text(f"⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
+    input_msg = await wait_for_message(m.chat.id)
+    if not input_msg or not input_msg.document:
+        await editable.edit("**🚫 No file received. Process cancelled.**")
+        return
+    
+    y = await input_msg.download()
+    await input_msg.delete()
     file_name, ext = os.path.splitext(os.path.basename(y))
-
+    
     if file_name.endswith("_helper"):
         y = decrypt_file_txt(y)
     else:
         x = y
-
+    
     path = f"./downloads/{m.chat.id}"
-
+    
     pdf_count = 0
     img_count = 0
     zip_count = 0
     video_count = 0
-
+    
     try:
         with open(x, "r") as f:
             content = f.read()
         content = content.split("\n")
-
+        
         links = []
         for i in content:
             if "://" in i:
@@ -275,47 +295,39 @@ async def upload(bot: Client, m: Message):
         await m.reply_text("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
         os.remove(x)
         return
-
-    status = await m.reply_text(
-        f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n🔹Img : {img_count}  🔹Pdf : {pdf_count}\n🔹Zip : {zip_count}  🔹Video : {video_count}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`"
-    )
-    input0: Message = await bot.ask(
-        m.chat.id,
-        "",
-        filters=filters.text
-    )
+    
+    await editable.edit(f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n🔹Img : {img_count}  🔹Pdf : {pdf_count}\n🔹Zip : {zip_count}  🔹Video : {video_count}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`")
+    
+    input0 = await wait_for_message(m.chat.id)
+    if not input0:
+        await editable.edit("**🚫 No input received. Process cancelled.**")
+        return
     raw_text = input0.text
-    await input0.delete(True)
+    await input0.delete()
     try:
         arg = int(raw_text)
     except:
         arg = 1
-
-    await status.edit(
-        "📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠"
-    )
-    input1: Message = await bot.ask(
-        m.chat.id,
-        "",
-        filters=filters.text
-    )
+    
+    await editable.edit("📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠")
+    input1 = await wait_for_message(m.chat.id)
+    if not input1:
+        await editable.edit("**🚫 No input received. Process cancelled.**")
+        return
     raw_text0 = input1.text
-    await input1.delete(True)
+    await input1.delete()
     if raw_text0 == "1":
         b_name = file_name
     else:
         b_name = raw_text0
-
-    await status.edit(
-        "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`"
-    )
-    input2: Message = await bot.ask(
-        m.chat.id,
-        "",
-        filters=filters.text
-    )
+    
+    await editable.edit("**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`")
+    input2 = await wait_for_message(m.chat.id)
+    if not input2:
+        await editable.edit("**🚫 No input received. Process cancelled.**")
+        return
     raw_text2 = input2.text
-    await input2.delete(True)
+    await input2.delete()
     try:
         if raw_text2 == "144":
             res = "256x144"
@@ -333,16 +345,15 @@ async def upload(bot: Client, m: Message):
             res = "UN"
     except Exception:
         res = "UN"
-
-    await status.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
-    input3: Message = await bot.ask(
-        m.chat.id,
-        "",
-        filters=filters.text
-    )
+    
+    await editable.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
+    input3 = await wait_for_message(m.chat.id)
+    if not input3:
+        await editable.edit("**🚫 No input received. Process cancelled.**")
+        return
     raw_text3 = input3.text
-    await input3.delete(True)
-    credit = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
+    await input3.delete()
+    credit = "️[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
     if raw_text3 == "1":
         CR = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
     elif raw_text3:
@@ -353,36 +364,38 @@ async def upload(bot: Client, m: Message):
             CR = raw_text3
     else:
         CR = credit
-
-    await status.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
-    input4: Message = await bot.ask(
-        m.chat.id,
-        "",
-        filters=filters.text
-    )
+    
+    await editable.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
+    input4 = await wait_for_message(m.chat.id)
+    if not input4:
+        await editable.edit("**🚫 No input received. Process cancelled.**")
+        return
     raw_text4 = input4.text
-    await input4.delete(True)
+    await input4.delete()
     if raw_text4 == "3":
         MR = token
     else:
         MR = raw_text4
-
-    await status.edit(
-        "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼"
-    )
-    input6: Message = await bot.ask(
-        m.chat.id,
-        "",
-        filters=filters.text
-    )
+    
+    await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼")
+    input6 = await wait_for_message(m.chat.id)
+    if not input6:
+        await editable.edit("**🚫 No input received. Process cancelled.**")
+        return
     raw_text6 = input6.text
-    await input6.delete(True)
-    await status.delete()
-
+    await input6.delete()
+    await editable.delete()
+    
     thumb = raw_text6
     if thumb.startswith("http://") or thumb.startswith("https://"):
-        getstatusoutput(f"wget '{thumb}' -O 'thumb.jpg'")
-        thumb = "thumb.jpg"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(thumb) as resp:
+                if resp.status == 200:
+                    async with aiofiles.open('thumb.jpg', 'wb') as f:
+                        await f.write(await resp.read())
+                    thumb = "thumb.jpg"
+                else:
+                    thumb = "no"
     else:
         thumb = "no"
     failed_count = 0
