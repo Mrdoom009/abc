@@ -6,21 +6,24 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 import logging
+import subprocess
 import datetime
 import asyncio
+import os
 import requests
 import time
+from p_bar import progress_bar
 import aiohttp
 import aiofiles
+import tgcrypto
 import concurrent.futures
 from pyrogram.types import Message
-from pyrogram import Client
+from pyrogram import Client, filters
 from pathlib import Path
 import re
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64decode
-import tempfile
 
 # Same AES Key aur IV jo encryption ke liye use kiya tha
 KEY = b"^#^#&@*HDU@&@*()"
