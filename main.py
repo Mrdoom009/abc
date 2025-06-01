@@ -61,7 +61,7 @@ async def show_random_emojis(message):
         "🐅",
         "🦁",
     ]
-    emoji_message = await message.reply_text(" ".join(random.choices(emojis, k=1)))
+    emoji_message = await msg.reply_text(" ".join(random.choices(emojis, k=1)))
     return emoji_message
 
 
@@ -94,10 +94,10 @@ async def wait_for_message(chat_id: int, timeout: int = 300) -> Message:
             del message_queues[chat_id]
 
 @bot.on_message(filters.all, group=-1)
-async def message_waiter(_, message: Message):
-    chat_id = message.chat.id
+async def message_waiter(_, msg: Message):
+    chat_id = msg.chat.id
     if chat_id in message_queues:
-        await message_queues[chat_id].put(message)
+        await message_queues[chat_id].put(msg)
 
 # Sudo command to add/remove sudo users
 @bot.on_message(filters.command("sudo"))
@@ -687,11 +687,11 @@ async def upload(bot: Client, msg: Message):
                         await asyncio.sleep(1)
                         continue
                     except subprocess.CalledProcessError:
-                        await message.reply(
+                        await msg.reply(
                             "Failed to download the image. Please check the URL."
                         )
                     except Exception as e:
-                        await message.reply(f"An error occurred: {e}")
+                        await msg.reply(f"An error occurred: {e}")
                     finally:
                         # Clean up the downloaded file
                         if os.path.exists(f"{name}.jpg"):
@@ -727,7 +727,7 @@ async def upload(bot: Client, msg: Message):
                         continue
 
                 elif "encrypted.m" in url:
-                    emoji_message = await show_random_emojis(message)
+                    emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
                     Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
                     prog = await msg.reply_text(Show)
@@ -744,7 +744,7 @@ async def upload(bot: Client, msg: Message):
                     continue
 
                 elif "drmcdni" in url or "drm/wv" in url:
-                    emoji_message = await show_random_emojis(message)
+                    emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
                     Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
                     prog = await msg.reply_text(Show)
@@ -762,7 +762,7 @@ async def upload(bot: Client, msg: Message):
                     continue
 
                 else:
-                    emoji_message = await show_random_emojis(message)
+                    emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
                     Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
                     prog = await msg.reply_text(Show)
