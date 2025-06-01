@@ -248,9 +248,9 @@ async def help_command(client: Client, msg: Message):
 
 
 @bot.on_message(filters.command(["tushar2", "upload2"]))
-async def upload(bot: Client, m: Message):
-    editable = await m.reply_text(f"⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
-    input_msg = await wait_for_message(m.chat.id)
+async def upload(bot: Client, msg: Message):
+    editable = await msg.reply_text(f"⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
+    input_msg = await wait_for_message(msg.chat.id)
     if not input_msg or not input_msg.document:
         await editable.edit("**🚫 No file received. Process cancelled.**")
         return
@@ -781,7 +781,7 @@ async def upload(bot: Client, m: Message):
                    f"🔗𝗨𝗿𝗹 » {url}\n\n"\
                    f"⚠️𝗘𝗿𝗿𝗼𝗿 » `{str(e)}`"
     
-                await m.reply_text(error_details)
+                await msg.reply_text(error_details)
                 logging.error(f"Download failed for {name}: {str(e)}")
     
                 count += 1
