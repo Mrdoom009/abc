@@ -231,31 +231,19 @@ async def help_command(client: Client, msg: Message):
 
 @bot.on_message(filters.command(["tushar2", "upload2"]))
 async def upload(bot: Client, m: Message):
-    # Removed authorization check: everyone can use this command now
-
-    # Step 1: Prompt user to send the .txt file
     editable = await m.reply_text("⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
-
-    # Replace `bot.listen(...)` with `bot.ask(...)`—this sends a new prompt and waits for a document
-    input: Message = await bot.ask(
-        m.chat.id,
-        "⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡",
-        filters=filters.document,
-        timeout=300
-    )
+    await editable.edit("📤 Send your `.txt` file:")
+    input: Message = await bot.ask(m.chat.id, "", filters=filters.document)
     y = await input.download()
-    await input.delete(True)
+    await input.delete()
     file_name, ext = os.path.splitext(os.path.basename(y))
 
-    # Step 2: If filename ends with "_helper", decrypt it; otherwise, keep as-is
     if file_name.endswith("_helper"):
-        x = decrypt_file_txt(y)
-        # We already deleted `input` above, no need to delete again
+        y = decrypt_file_txt(y)
     else:
         x = y
 
     path = f"./downloads/{m.chat.id}"
-
     pdf_count = 0
     img_count = 0
     zip_count = 0
@@ -263,153 +251,94 @@ async def upload(bot: Client, m: Message):
 
     try:
         with open(x, "r") as f:
-            content = f.read().split("\n")
+            content = f.read()
+        content = content.split("\n")
 
         links = []
-        for line in content:
-            if "://" in line:
-                parts = line.split("://", 1)
-                url = parts[1]
-                links.append(parts)
+        for i in content:
+            if "://" in i:
+                url = i.split("://", 1)[1]
+                links.append(i.split("://", 1))
                 if ".pdf" in url:
                     pdf_count += 1
-                elif url.lower().endswith((".png", ".jpeg", ".jpg")):
+                elif url.endswith((".png", ".jpeg", ".jpg")):
                     img_count += 1
                 elif ".zip" in url:
                     zip_count += 1
                 else:
                     video_count += 1
-
         os.remove(x)
     except:
-        await m.reply_text("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
+        await editable.edit("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
         os.remove(x)
         return
 
-    # Step 3: Show summary of link counts and ask for the starting index
-    summary_text = (
-        f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}`\n\n"
-        f"🔹 Img : {img_count}  🔹 Pdf : {pdf_count}\n"
-        f"🔹 Zip : {zip_count}  🔹 Video : {video_count}\n\n"
-        f"𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱."
+    await editable.edit(
+        f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n🔹Img : {img_count}  🔹Pdf : {pdf_count}\n🔹Zip : {zip_count}  🔹Video : {video_count}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`"
     )
-    await editable.edit(summary_text)
-
-    input0: Message = await bot.ask(
-        m.chat.id,
-        summary_text,
-        filters=filters.text,
-        timeout=120
-    )
+    input0: Message = await bot.ask(m.chat.id, "")
     raw_text = input0.text
-    await input0.delete(True)
+    await input0.delete()
     try:
         arg = int(raw_text)
     except:
         arg = 1
 
-    # Step 4: Ask for batch name
-    await editable.edit(
-        "📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n"
-        "🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠"
-    )
-    input1: Message = await bot.ask(
-        m.chat.id,
-        "📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚",
-        filters=filters.text,
-        timeout=120
-    )
+    await editable.edit("📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠")
+    input1: Message = await bot.ask(m.chat.id, "")
     raw_text0 = input1.text
-    await input1.delete(True)
+    await input1.delete()
     b_name = file_name if raw_text0 == "1" else raw_text0
 
-    # Step 5: Ask for resolution
     await editable.edit(
-        "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n"
-        "➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`"
+        "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`"
     )
-    input2: Message = await bot.ask(
-        m.chat.id,
-        "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**",
-        filters=filters.text,
-        timeout=120
-    )
+    input2: Message = await bot.ask(m.chat.id, "")
     raw_text2 = input2.text
-    await input2.delete(True)
-    try:
-        if raw_text2 == "144":
-            res = "256x144"
-        elif raw_text2 == "240":
-            res = "426x240"
-        elif raw_text2 == "360":
-            res = "640x360"
-        elif raw_text2 == "480":
-            res = "854x480"
-        elif raw_text2 == "720":
-            res = "1280x720"
-        elif raw_text2 == "1080":
-            res = "1920x1080"
-        else:
-            res = "UN"
-    except Exception:
-        res = "UN"
+    await input2.delete()
+    res_map = {
+        "144": "256x144",
+        "240": "426x240",
+        "360": "640x360",
+        "480": "854x480",
+        "720": "1280x720",
+        "1080": "1920x1080"
+    }
+    res = res_map.get(raw_text2, "UN")
 
-    # Step 6: Ask for credit/name
-    await editable.edit(
-        "📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n"
-        "🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥"
-    )
-    input3: Message = await bot.ask(
-        m.chat.id,
-        "📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛",
-        filters=filters.text,
-        timeout=120
-    )
+    await editable.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
+    input3: Message = await bot.ask(m.chat.id, "")
     raw_text3 = input3.text
-    await input3.delete(True)
-
-    credit = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
+    await input3.delete()
+    credit = "️[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
     if raw_text3 == "1":
-        CR = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
-    else:
+        CR = credit
+    elif raw_text3:
         try:
             text, link = raw_text3.split(",")
             CR = f"[{text.strip()}]({link.strip()})"
         except ValueError:
-            CR = raw_text3 or credit
+            CR = raw_text3
+    else:
+        CR = credit
 
-    # Step 7: Ask for password token (PW Token)
-    await editable.edit(
-        "**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**"
-    )
-    input4: Message = await bot.ask(
-        m.chat.id,
-        "**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**",
-        filters=filters.text,
-        timeout=120
-    )
+    await editable.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
+    input4: Message = await bot.ask(m.chat.id, "")
     raw_text4 = input4.text
-    await input4.delete(True)
-    MR = raw_text4 if raw_text4 != "3" else token
+    await input4.delete()
+    MR = token if raw_text4 == "3" else raw_text4
 
-    # Step 8: Ask for thumbnail URL (or "no")
     await editable.edit(
-        "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n"
-        "𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼"
+        "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼"
     )
-    input6: Message = await bot.ask(
-        m.chat.id,
-        "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴...",
-        filters=filters.text,
-        timeout=120
-    )
+    input6 = await bot.ask(m.chat.id, "")
     raw_text6 = input6.text
-    await input6.delete(True)
+    await input6.delete()
     await editable.delete()
 
     thumb = raw_text6
     if thumb.startswith("http://") or thumb.startswith("https://"):
-        subprocess.getstatusoutput(f"wget '{thumb}' -O 'thumb.jpg'")
+        getstatusoutput(f"wget '{thumb}' -O 'thumb.jpg'")
         thumb = "thumb.jpg"
     else:
         thumb = "no"
