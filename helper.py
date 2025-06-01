@@ -6,24 +6,21 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 import logging
-import subprocess
 import datetime
 import asyncio
-import os
 import requests
 import time
-from p_bar import progress_bar
 import aiohttp
 import aiofiles
-import tgcrypto
 import concurrent.futures
 from pyrogram.types import Message
-from pyrogram import Client, filters
+from pyrogram import Client
 from pathlib import Path
 import re
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64decode
+import tempfile
 
 # Same AES Key aur IV jo encryption ke liye use kiya tha
 KEY = b"^#^#&@*HDU@&@*()"
@@ -78,55 +75,55 @@ def decrypt_file_txt(input_file):
     return output_file  # Decrypted file ka naam return karega
 
 
-def duration(filename):
-    result = subprocess.run(
-        [
-            "ffprobe",
-            "-v",
-            "error",
-            "-show_entries",
-            "format=duration",
-            "-of",
-            "default=noprint_wrappers=1:nokey=1",
-            filename,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+async def duration(filename):
+    cmd = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        filename,
+    ]
+    
+    process = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
     )
-    return float(result.stdout)
+    
+    stdout, stderr = await process.communicate()
+    return float(stdout.decode().strip())
 
 
-def get_mps_and_keys(api_url):
-    response = requests.get(api_url)
-    response_json = response.json()
-    mpd = response_json.get("MPD")
-    keys = response_json.get("KEYS")
-    return mpd, keys
-
-
-def exec(cmd):
-    process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output = process.stdout.decode()
-    print(output)
-    return output
-    # err = process.stdout.decode()
-
-
-def pull_run(work, cmds):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=work) as executor:
-        print("Waiting for tasks to complete")
-        fut = executor.map(exec, cmds)
-
-
-async def aio(url, name):
-    k = f"{name}.pdf"
+async def get_mps_and_keys(api_url):
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status == 200:
-                f = await aiofiles.open(k, mode="wb")
-                await f.write(await resp.read())
-                await f.close()
-    return k
+        async with session.get(api_url) as response:
+            response_json = await response.json()
+            mpd = response_json.get("MPD")
+            keys = response_json.get("KEYS")
+            return mpd, keys
+
+
+async def exec(cmd):
+    process = await asyncio.create_subprocess_shell(
+        cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    
+    stdout, stderr = await process.communicate()
+    output = stdout.decode()
+    return output
+
+
+async def pull_run(work, cmds):
+    tasks = []
+    for cmd in cmds:
+        tasks.append(exec(cmd))
+    
+    await asyncio.gather(*tasks)
 
 
 async def download(url, name):
@@ -134,20 +131,20 @@ async def download(url, name):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status == 200:
-                f = await aiofiles.open(ka, mode="wb")
-                await f.write(await resp.read())
-                await f.close()
+                async with aiofiles.open(ka, mode="wb") as f:
+                    await f.write(await resp.read())
     return ka
 
 
 async def pdf_download(url, file_name, chunk_size=1024 * 10):
     if os.path.exists(file_name):
         os.remove(file_name)
-    r = requests.get(url, allow_redirects=True, stream=True)
-    with open(file_name, "wb") as fd:
-        for chunk in r.iter_content(chunk_size=chunk_size):
-            if chunk:
-                fd.write(chunk)
+        
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            async with aiofiles.open(file_name, "wb") as fd:
+                async for chunk in response.content.iter_chunked(chunk_size):
+                    await fd.write(chunk)
     return file_name
 
 
@@ -195,13 +192,7 @@ def vid_info(info):
                     and "audio" not in i[2]
                 ):
                     temp.append(i[2])
-
-                    # temp.update(f'{i[2]}')
-                    # new_info.append((i[2], i[0]))
-                    #  mp4,mkv etc ==== f"({i[1]})"
-
                     new_info.update({f"{i[2]}": f"{i[0]}"})
-
             except:
                 pass
     return new_info
@@ -214,9 +205,9 @@ async def decrypt_and_merge_video(
         output_path = Path(output_path)
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Download video
         cmd1 = f'yt-dlp -f "bv[height<={quality}]+ba/b" -o "{output_path}/file.%(ext)s" --allow-unplayable-format --no-check-certificate --external-downloader aria2c "{mpd_url}"'
-        print(f"Running command: {cmd1}")
-        os.system(cmd1)
+        await exec(cmd1)
 
         avDir = list(output_path.iterdir())
         print(f"Downloaded files: {avDir}")
@@ -228,15 +219,13 @@ async def decrypt_and_merge_video(
         for data in avDir:
             if data.suffix == ".mp4" and not video_decrypted:
                 cmd2 = f'mp4decrypt {keys_string} --show-progress "{data}" "{output_path}/video.mp4"'
-                print(f"Running command: {cmd2}")
-                os.system(cmd2)
+                await exec(cmd2)
                 if (output_path / "video.mp4").exists():
                     video_decrypted = True
                 data.unlink()
             elif data.suffix == ".m4a" and not audio_decrypted:
                 cmd3 = f'mp4decrypt {keys_string} --show-progress "{data}" "{output_path}/audio.m4a"'
-                print(f"Running command: {cmd3}")
-                os.system(cmd3)
+                await exec(cmd3)
                 if (output_path / "audio.m4a").exists():
                     audio_decrypted = True
                 data.unlink()
@@ -244,9 +233,11 @@ async def decrypt_and_merge_video(
         if not video_decrypted or not audio_decrypted:
             raise FileNotFoundError("Decryption failed: video or audio file not found.")
 
+        # Merge video and audio
         cmd4 = f'ffmpeg -i "{output_path}/video.mp4" -i "{output_path}/audio.m4a" -c copy "{output_path}/{output_name}.mp4"'
-        print(f"Running command: {cmd4}")
-        os.system(cmd4)
+        await exec(cmd4)
+        
+        # Cleanup
         if (output_path / "video.mp4").exists():
             (output_path / "video.mp4").unlink()
         if (output_path / "audio.m4a").exists():
@@ -256,10 +247,6 @@ async def decrypt_and_merge_video(
 
         if not filename.exists():
             raise FileNotFoundError("Merged video file not found.")
-
-        cmd5 = f'ffmpeg -i "{filename}" 2>&1 | grep "Duration"'
-        duration_info = os.popen(cmd5).read()
-        print(f"Duration info: {duration_info}")
 
         return str(filename)
 
@@ -284,17 +271,6 @@ async def run(cmd):
         return f"[stderr]\n{stderr.decode()}"
 
 
-def old_download(url, file_name, chunk_size=1024 * 10):
-    if os.path.exists(file_name):
-        os.remove(file_name)
-    r = requests.get(url, allow_redirects=True, stream=True)
-    with open(file_name, "wb") as fd:
-        for chunk in r.iter_content(chunk_size=chunk_size):
-            if chunk:
-                fd.write(chunk)
-    return file_name
-
-
 def human_readable_size(size, decimal_places=2):
     for unit in ["B", "KB", "MB", "GB", "TB", "PB"]:
         if size < 1024.0 or unit == "PB":
@@ -311,44 +287,36 @@ def time_name():
 
 
 async def download_video(url, cmd, name):
-    download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32" --cookies cookies.txt'
+    download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32"'
     global failed_counter
-    print(download_cmd)
-    logging.info(download_cmd)
-    k = subprocess.run(download_cmd, shell=True)
-    if "visionias" in cmd and k.returncode != 0 and failed_counter <= 10:
-        failed_counter += 1
-        await asyncio.sleep(1)
-        await download_video(url, cmd, name)
-    failed_counter = 0
-    try:
-        if os.path.isfile(name):
-            return name
-        elif os.path.isfile(f"{name}.webm"):
-            return f"{name}.webm"
-        name = name.split(".")[0]
-        if os.path.isfile(f"{name}.mkv"):
-            return f"{name}.mkv"
-        elif os.path.isfile(f"{name}.mp4"):
-            return f"{name}.mp4"
-        elif os.path.isfile(f"{name}.mp4.webm"):
-            return f"{name}.mp4.webm"
-
-        return name
-    except FileNotFoundError as exc:
-        return os.path.isfile.splitext[0] + "." + "mp4"
+    
+    # Run command asynchronously
+    process = await asyncio.create_subprocess_shell(
+        download_cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    
+    await process.communicate()
+    
+    # Check for file existence with different extensions
+    for ext in ["", ".webm", ".mkv", ".mp4", ".mp4.webm"]:
+        file_path = f"{name}{ext}"
+        if os.path.isfile(file_path):
+            return file_path
+    
+    return None
 
 
-async def send_doc(bot: Client, m: Message, cc, ka, cc1, prog, count, name):
+async def send_doc(bot: Client, m: Message, cc, ka, cc1, count, name):
     reply = await m.reply_text(f"Uploading - `{name}`")
-    time.sleep(1)
-    start_time = time.time()
-    await m.reply_document(ka, caption=cc1)
-    count += 1
-    await reply.delete(True)
-    time.sleep(1)
-    os.remove(ka)
-    time.sleep(2)
+    try:
+        await m.reply_document(ka, caption=cc1)
+        count += 1
+    finally:
+        await reply.delete()
+        if os.path.exists(ka):
+            os.remove(ka)
 
 
 def decrypt_file(file_path, key):
@@ -367,45 +335,20 @@ def decrypt_file(file_path, key):
 
 async def download_and_decrypt_video(url, cmd, name, key):
     video_path = await download_video(url, cmd, name)
-
-    if video_path:
-        decrypted = decrypt_file(video_path, key)
-        if decrypted:
-            print(f"File {video_path} decrypted successfully.")
-            return video_path
-        else:
-            print(f"Failed to decrypt {video_path}.")
-            return None
+    if video_path and decrypt_file(video_path, key):
+        return video_path
+    return None
 
 
 async def download_and_decrypt_pdf(url, name, key):
     download_cmd = f'yt-dlp -o "{name}.pdf" "{url}" -R 25 --fragment-retries 25'
-    try:
-        subprocess.run(download_cmd, shell=True, check=True)
-        print(f"Downloaded PDF: {name}.pdf")
-    except subprocess.CalledProcessError as e:
-        print(f"Error during download: {e}")
-        return False
-
+    process = await asyncio.create_subprocess_shell(download_cmd)
+    await process.wait()
+    
     file_path = f"{name}.pdf"
-    if not os.path.exists(file_path):
-        print(f"The file {file_path} does not exist.")
-        return False
-
-    try:
-        with open(file_path, "r+b") as f:
-            num_bytes = min(28, os.path.getsize(file_path))
-            with mmap.mmap(
-                f.fileno(), length=num_bytes, access=mmap.ACCESS_WRITE
-            ) as mmapped_file:
-                for i in range(num_bytes):
-                    mmapped_file[i] ^= ord(key[i]) if i < len(key) else i
-
-        print(f"Decryption completed for {file_path}.")
+    if os.path.exists(file_path) and decrypt_file(file_path, key):
         return file_path
-    except Exception as e:
-        print(f"Error during decryption: {e}")
-        return False
+    return None
 
 
 # -----------------------Emoji handler------------------------------------
@@ -422,77 +365,72 @@ def get_next_emoji():
 
 
 async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
-
     emoji = get_next_emoji()
-    subprocess.run(
-        f'ffmpeg -i "{filename}" -ss 00:00:02 -vframes 1 "{filename}.jpg"', shell=True
+    
+    # Generate thumbnail asynchronously
+    thumbnail_path = f"{filename}.jpg"
+    thumb_process = await asyncio.create_subprocess_shell(
+        f'ffmpeg -i "{filename}" -ss 00:00:02 -vframes 1 "{thumbnail_path}"'
     )
-    await prog.delete(True)
+    await thumb_process.wait()
+    
+    await prog.delete()
     reply = await m.reply_text(f"🚀🚀𝗨𝗣𝗟𝗢𝗔𝗗𝗜𝗡𝗚🚀🚀🚀** » `{name}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥")
+
     try:
-        if thumb == "no":
-            thumbnail = f"{filename}.jpg"
+        if thumb == "no" and os.path.exists(thumbnail_path):
+            thumbnail = thumbnail_path
         else:
             thumbnail = thumb
-    except Exception as e:
-        await m.reply_text(str(e))
+            
+        dur = await duration(filename)
+        processing_msg = await m.reply_text(emoji)
 
-    dur = int(duration(filename))
-    processing_msg = await m.reply_text(emoji)
-
-    start_time = time.time()
-
-    try:
-        await m.reply_video(
-            filename,
-            caption=cc,
-            supports_streaming=True,
-            height=720,
-            width=1280,
-            thumb=thumbnail,
-            duration=dur,
-            progress=progress_bar,
-            progress_args=(reply, start_time),
-        )
-    except Exception:
-        await m.reply_document(
-            filename,
-            caption=cc,
-            progress=progress_bar,
-            progress_args=(reply, start_time),
-        )
-    os.remove(filename)
-
-    os.remove(f"{filename}.jpg")
-    await processing_msg.delete(True)
-    await reply.delete(True)
+        try:
+            await m.reply_video(
+                filename,
+                caption=cc,
+                supports_streaming=True,
+                height=720,
+                width=1280,
+                thumb=thumbnail,
+                duration=dur,
+                progress=progress_bar,
+                progress_args=(reply, time.time()),
+            )
+        except Exception:
+            await m.reply_document(
+                filename,
+                caption=cc,
+                progress=progress_bar,
+                progress_args=(reply, time.time()),
+            )
+            
+    finally:
+        # Cleanup
+        if os.path.exists(filename):
+            os.remove(filename)
+        if os.path.exists(thumbnail_path):
+            os.remove(thumbnail_path)
+        await processing_msg.delete()
+        await reply.delete()
 
 
 async def watermark_pdf(file_path, watermark_text):
     def create_watermark(text):
-        """Create a PDF watermark using ReportLab."""
         packet = BytesIO()
         can = canvas.Canvas(packet, pagesize=letter)
-
-        # Page dimensions
         width, height = letter
-
-        # Set font, size, and color
         can.setFont("Helvetica", 40)
-        can.setFillColorRGB(0.6, 0.6, 0.6, alpha=0.5)  # Semi-transparent gray
-
-        # Rotate canvas and draw text in center
+        can.setFillColorRGB(0.6, 0.6, 0.6, alpha=0.5)
         can.saveState()
         can.translate(width / 2, height / 2)
         can.rotate(45)
-
-        # Split text into lines
         lines = text.split("\n")
-        line_height = 50  # Adjust line spacing
+        line_height = 50
         for i, line in enumerate(lines):
             text_width = can.stringWidth(line, "Helvetica", 40)
             can.drawString(-text_width / 2, -i * line_height, line)
-
         can.restoreState()
         can.save()
         packet.seek(0)
