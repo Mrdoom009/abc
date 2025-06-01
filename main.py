@@ -45,7 +45,7 @@ async def show_random_emojis(msg: Message):  # Changed parameter name to msg
         "🎊", "🔮", "😎", "⚡️", "🚀", "✨", "💥", "🎉", "🥂", "🍾", 
         "🦠", "🤖", "❤️‍🔥", "🕊️", "💃", "🥳", "🐅", "🦁",
     ]
-    emoji_message = await msg.reply_text(" ".join(random.choices(emojis, k=1))
+    emoji_message = await msg.reply_text(" ".join(random.choices(emojis, k=1)))
     return emoji_message
 
 # Define the owner's user ID
@@ -721,7 +721,7 @@ async def upload(bot: Client, msg: Message):
 
                     await prog.delete(True)
                     await emoji_message.delete()
-                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                    await helper.send_vid(bot, msg, cc, filename, thumb, name, prog)
                     count += 1
                     await asyncio.sleep(1)
                     continue
@@ -739,7 +739,7 @@ async def upload(bot: Client, msg: Message):
                     filename = res_file
                     await prog.delete(True)
                     await emoji_message.delete()
-                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                    await helper.send_vid(bot, msg, cc, filename, thumb, name, prog)
                     count += 1
                     await asyncio.sleep(1)
                     continue
@@ -754,7 +754,7 @@ async def upload(bot: Client, msg: Message):
                     filename = res_file
                     await prog.delete(True)
                     await emoji_message.delete()
-                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                    await helper.send_vid(bot, msg, cc, filename, thumb, name, prog)
                     count += 1
                     time.sleep(1)
 
