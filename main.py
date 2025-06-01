@@ -8,7 +8,6 @@ from pyrogram import Client, filters
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import FloodWait
-from pyromod import listen
 from pyrogram.types import Message
 from p_bar import progress_bar
 from subprocess import getstatusoutput
@@ -68,10 +67,10 @@ async def show_random_emojis(message):
 
 
 # Define the owner's user ID
-OWNER_ID = 5840594311  # Replace with the actual owner's user ID
+OWNER_ID = 6400973182  # Replace with the actual owner's user ID
 
 # List of sudo users (initially empty or pre-populated)
-SUDO_USERS = [5840594311]
+SUDO_USERS = [6400973182]
 
 AUTH_CHANNEL = -1002595188554
 
@@ -230,22 +229,28 @@ async def help_command(client: Client, msg: Message):
     await msg.reply_text(help_text)
 
 
-# Upload command handler
 @bot.on_message(filters.command(["tushar2", "upload2"]))
 async def upload(bot: Client, m: Message):
-    if not is_authorized(m.chat.id):
-        await m.reply_text("**🚫You are not authorized to use this bot.**")
-        return
+    # Removed authorization check: everyone can use this command now
 
-    editable = await m.reply_text(f"⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
-    input: Message = await bot.listen(editable.chat.id)
+    # Step 1: Prompt user to send the .txt file
+    editable = await m.reply_text("⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
+
+    # Replace `bot.listen(...)` with `bot.ask(...)`—this sends a new prompt and waits for a document
+    input: Message = await bot.ask(
+        m.chat.id,
+        "⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡",
+        filters=filters.document,
+        timeout=300
+    )
     y = await input.download()
     await input.delete(True)
     file_name, ext = os.path.splitext(os.path.basename(y))
 
-    if file_name.endswith("_helper"):  # ✅ Check if filename ends with "_helper"
-        y = decrypt_file_txt(y)  # Decrypt the file
-        await input.delete(True)
+    # Step 2: If filename ends with "_helper", decrypt it; otherwise, keep as-is
+    if file_name.endswith("_helper"):
+        x = decrypt_file_txt(y)
+        # We already deleted `input` above, no need to delete again
     else:
         x = y
 
@@ -258,51 +263,77 @@ async def upload(bot: Client, m: Message):
 
     try:
         with open(x, "r") as f:
-            content = f.read()
-        content = content.split("\n")
+            content = f.read().split("\n")
 
         links = []
-        for i in content:
-            if "://" in i:
-                url = i.split("://", 1)[1]
-                links.append(i.split("://", 1))
+        for line in content:
+            if "://" in line:
+                parts = line.split("://", 1)
+                url = parts[1]
+                links.append(parts)
                 if ".pdf" in url:
                     pdf_count += 1
-                elif url.endswith((".png", ".jpeg", ".jpg")):
+                elif url.lower().endswith((".png", ".jpeg", ".jpg")):
                     img_count += 1
                 elif ".zip" in url:
                     zip_count += 1
                 else:
                     video_count += 1
+
         os.remove(x)
     except:
         await m.reply_text("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
         os.remove(x)
         return
 
-    await editable.edit(
-        f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n🔹Img : {img_count}  🔹Pdf : {pdf_count}\n🔹Zip : {zip_count}  🔹Video : {video_count}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`"
+    # Step 3: Show summary of link counts and ask for the starting index
+    summary_text = (
+        f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}`\n\n"
+        f"🔹 Img : {img_count}  🔹 Pdf : {pdf_count}\n"
+        f"🔹 Zip : {zip_count}  🔹 Video : {video_count}\n\n"
+        f"𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱."
     )
-    input0: Message = await bot.listen(editable.chat.id)
+    await editable.edit(summary_text)
+
+    input0: Message = await bot.ask(
+        m.chat.id,
+        summary_text,
+        filters=filters.text,
+        timeout=120
+    )
     raw_text = input0.text
     await input0.delete(True)
     try:
         arg = int(raw_text)
     except:
         arg = 1
-    await editable.edit("📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠")
-    input1: Message = await bot.listen(editable.chat.id)
+
+    # Step 4: Ask for batch name
+    await editable.edit(
+        "📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n"
+        "🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠"
+    )
+    input1: Message = await bot.ask(
+        m.chat.id,
+        "📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚",
+        filters=filters.text,
+        timeout=120
+    )
     raw_text0 = input1.text
     await input1.delete(True)
-    if raw_text0 == "1":
-        b_name = file_name
-    else:
-        b_name = raw_text0
+    b_name = file_name if raw_text0 == "1" else raw_text0
 
+    # Step 5: Ask for resolution
     await editable.edit(
-        "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`"
+        "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n"
+        "➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`"
     )
-    input2: Message = await bot.listen(editable.chat.id)
+    input2: Message = await bot.ask(
+        m.chat.id,
+        "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**",
+        filters=filters.text,
+        timeout=120
+    )
     raw_text2 = input2.text
     await input2.delete(True)
     try:
@@ -323,51 +354,65 @@ async def upload(bot: Client, m: Message):
     except Exception:
         res = "UN"
 
-    await editable.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
-    input3: Message = await bot.listen(editable.chat.id)
+    # Step 6: Ask for credit/name
+    await editable.edit(
+        "📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n"
+        "🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥"
+    )
+    input3: Message = await bot.ask(
+        m.chat.id,
+        "📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛",
+        filters=filters.text,
+        timeout=120
+    )
     raw_text3 = input3.text
     await input3.delete(True)
-    # Default credit message with link
-    credit = "️[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
+
+    credit = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
     if raw_text3 == "1":
         CR = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
-    elif raw_text3:
+    else:
         try:
             text, link = raw_text3.split(",")
             CR = f"[{text.strip()}]({link.strip()})"
         except ValueError:
-            CR = raw_text3  # In case the input is not in the expected format, use the raw text
-    else:
-        CR = credit
-    # highlighter  = f"️ ⁪⁬⁮⁮⁮"
-    # if raw_text3 == 'Robin':
-    # MR = highlighter
-    # else:
-    # MR = raw_text3
+            CR = raw_text3 or credit
 
-    await editable.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
-    input4: Message = await bot.listen(editable.chat.id)
+    # Step 7: Ask for password token (PW Token)
+    await editable.edit(
+        "**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**"
+    )
+    input4: Message = await bot.ask(
+        m.chat.id,
+        "**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**",
+        filters=filters.text,
+        timeout=120
+    )
     raw_text4 = input4.text
     await input4.delete(True)
-    if raw_text4 == 3:
-        MR = token
-    else:
-        MR = raw_text4
+    MR = raw_text4 if raw_text4 != "3" else token
 
+    # Step 8: Ask for thumbnail URL (or "no")
     await editable.edit(
-        "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼"
+        "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n"
+        "𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼"
     )
-    input6 = message = await bot.listen(editable.chat.id)
+    input6: Message = await bot.ask(
+        m.chat.id,
+        "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴...",
+        filters=filters.text,
+        timeout=120
+    )
     raw_text6 = input6.text
     await input6.delete(True)
     await editable.delete()
 
-    thumb = input6.text
+    thumb = raw_text6
     if thumb.startswith("http://") or thumb.startswith("https://"):
-        getstatusoutput(f"wget '{thumb}' -O 'thumb.jpg'")
+        subprocess.getstatusoutput(f"wget '{thumb}' -O 'thumb.jpg'")
         thumb = "thumb.jpg"
     else:
-        thumb == "no"
+        thumb = "no"
     failed_count = 0
     if len(links) == 1:
         count = 1
