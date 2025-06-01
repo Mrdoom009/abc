@@ -231,11 +231,13 @@ async def help_command(client: Client, msg: Message):
 
 @bot.on_message(filters.command(["tushar2", "upload2"]))
 async def upload(bot: Client, m: Message):
-    editable = await m.reply_text("⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
-    await editable.edit("📤 Send your `.txt` file:")
-    input: Message = await bot.ask(m.chat.id, "", filters=filters.document)
+    input: Message = await bot.ask(
+        m.chat.id,
+        "⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡",
+        filters=filters.document
+    )
     y = await input.download()
-    await input.delete()
+    await input.delete(True)
     file_name, ext = os.path.splitext(os.path.basename(y))
 
     if file_name.endswith("_helper"):
@@ -244,6 +246,7 @@ async def upload(bot: Client, m: Message):
         x = y
 
     path = f"./downloads/{m.chat.id}"
+
     pdf_count = 0
     img_count = 0
     zip_count = 0
@@ -269,50 +272,79 @@ async def upload(bot: Client, m: Message):
                     video_count += 1
         os.remove(x)
     except:
-        await editable.edit("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
+        await m.reply_text("😶𝗜𝗻𝘃𝗮𝗹𝗶𝗱 𝗙𝗶𝗹𝗲 𝗜𝗻𝗽𝘂𝘁😶")
         os.remove(x)
         return
 
-    await editable.edit(
+    status = await m.reply_text(
         f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n🔹Img : {img_count}  🔹Pdf : {pdf_count}\n🔹Zip : {zip_count}  🔹Video : {video_count}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`"
     )
-    input0: Message = await bot.ask(m.chat.id, "")
+    input0: Message = await bot.ask(
+        m.chat.id,
+        "",
+        filters=filters.text
+    )
     raw_text = input0.text
-    await input0.delete()
+    await input0.delete(True)
     try:
         arg = int(raw_text)
     except:
         arg = 1
 
-    await editable.edit("📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠")
-    input1: Message = await bot.ask(m.chat.id, "")
+    await status.edit(
+        "📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠"
+    )
+    input1: Message = await bot.ask(
+        m.chat.id,
+        "",
+        filters=filters.text
+    )
     raw_text0 = input1.text
-    await input1.delete()
-    b_name = file_name if raw_text0 == "1" else raw_text0
+    await input1.delete(True)
+    if raw_text0 == "1":
+        b_name = file_name
+    else:
+        b_name = raw_text0
 
-    await editable.edit(
+    await status.edit(
         "**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`"
     )
-    input2: Message = await bot.ask(m.chat.id, "")
+    input2: Message = await bot.ask(
+        m.chat.id,
+        "",
+        filters=filters.text
+    )
     raw_text2 = input2.text
-    await input2.delete()
-    res_map = {
-        "144": "256x144",
-        "240": "426x240",
-        "360": "640x360",
-        "480": "854x480",
-        "720": "1280x720",
-        "1080": "1920x1080"
-    }
-    res = res_map.get(raw_text2, "UN")
+    await input2.delete(True)
+    try:
+        if raw_text2 == "144":
+            res = "256x144"
+        elif raw_text2 == "240":
+            res = "426x240"
+        elif raw_text2 == "360":
+            res = "640x360"
+        elif raw_text2 == "480":
+            res = "854x480"
+        elif raw_text2 == "720":
+            res = "1280x720"
+        elif raw_text2 == "1080":
+            res = "1920x1080"
+        else:
+            res = "UN"
+    except Exception:
+        res = "UN"
 
-    await editable.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
-    input3: Message = await bot.ask(m.chat.id, "")
+    await status.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
+    input3: Message = await bot.ask(
+        m.chat.id,
+        "",
+        filters=filters.text
+    )
     raw_text3 = input3.text
-    await input3.delete()
-    credit = "️[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
+    await input3.delete(True)
+    credit = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
     if raw_text3 == "1":
-        CR = credit
+        CR = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
     elif raw_text3:
         try:
             text, link = raw_text3.split(",")
@@ -322,19 +354,30 @@ async def upload(bot: Client, m: Message):
     else:
         CR = credit
 
-    await editable.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
-    input4: Message = await bot.ask(m.chat.id, "")
+    await status.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
+    input4: Message = await bot.ask(
+        m.chat.id,
+        "",
+        filters=filters.text
+    )
     raw_text4 = input4.text
-    await input4.delete()
-    MR = token if raw_text4 == "3" else raw_text4
+    await input4.delete(True)
+    if raw_text4 == "3":
+        MR = token
+    else:
+        MR = raw_text4
 
-    await editable.edit(
+    await status.edit(
         "𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼"
     )
-    input6 = await bot.ask(m.chat.id, "")
+    input6: Message = await bot.ask(
+        m.chat.id,
+        "",
+        filters=filters.text
+    )
     raw_text6 = input6.text
-    await input6.delete()
-    await editable.delete()
+    await input6.delete(True)
+    await status.delete()
 
     thumb = raw_text6
     if thumb.startswith("http://") or thumb.startswith("https://"):
