@@ -40,30 +40,13 @@ api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NS
 token_cp = "eyJjb3Vyc2VJZCI6IjQ1NjY4NyIsInR1dG9ySWQiOm51bGwsIm9yZ0lkIjo0ODA2MTksImNhdGVnb3J5SWQiOm51bGx9gft"
 
 
-async def show_random_emojis(message):
+async def show_random_emojis(msg: Message):  # Changed parameter name to msg
     emojis = [
-        "🎊",
-        "🔮",
-        "😎",
-        "⚡️",
-        "🚀",
-        "✨",
-        "💥",
-        "🎉",
-        "🥂",
-        "🍾",
-        "🦠",
-        "🤖",
-        "❤️‍🔥",
-        "🕊️",
-        "💃",
-        "🥳",
-        "🐅",
-        "🦁",
+        "🎊", "🔮", "😎", "⚡️", "🚀", "✨", "💥", "🎉", "🥂", "🍾", 
+        "🦠", "🤖", "❤️‍🔥", "🕊️", "💃", "🥳", "🐅", "🦁",
     ]
-    emoji_message = await msg.reply_text(" ".join(random.choices(emojis, k=1)))
+    emoji_message = await msg.reply_text(" ".join(random.choices(emojis, k=1))
     return emoji_message
-
 
 # Define the owner's user ID
 OWNER_ID = 6400973182  # Replace with the actual owner's user ID
