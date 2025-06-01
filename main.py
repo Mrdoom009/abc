@@ -372,7 +372,7 @@ async def upload(bot: Client, m: Message):
         return
     raw_text4 = input4.text
     await input4.delete()
-    if raw_text4 == "3":
+    if raw_text4 == 3:
         MR = token
     else:
         MR = raw_text4
