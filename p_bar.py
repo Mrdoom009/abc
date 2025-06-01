@@ -91,11 +91,12 @@ async def progress_bar(current, total, reply, start):
         bar_length = 10
         completed_length = int(current * bar_length / total)
         remaining_length = bar_length - completed_length
-        progress_bar = "🔷" * completed_length + "🔶" * remaining_length
+        progress_bar = "🟢" * completed_length + "🔴" * remaining_length
 
         try:
             await reply.edit(
-                f"╭──⊷⊶⊷⊶◆◈☛ **Uᴘʟσᴅɪɴɢ** ☚◈◆⊷⊶⊷⊶──╮\n├⚡ {progress_bar}\n ├🚀 Sᴘєєᴅ ➠ {sp}\n├📛 Pʀσɢʀєss ➠ {perc}\n ├📟 Dσɴє ➠ {cur}\n ├🧲 Sɪᴢє ➠ {tot}\n ├🕑 Eᴛα ➠ {eta}\n╰─══⊷⊶⊷⊶⊷⊶⊷⊶⊷⊶⊷⊶⊷⊶⊷⊶⊷⊶══─╯"
+                f"╭──◈◈◈◈**Uᴘʟσᴅɪɴɢ**◈◈◈◈──╮\n├⚡ {progress_bar}\n├🚀 Sᴘєєᴅ ➠ {sp}\n├📛 Pʀσɢʀєss ➠ {perc}\n├📟 Dσɴє ➠ {cur}\n├🧲 Sɪᴢє ➠ {tot}\n├🕑 Eᴛα ➠ {eta}\n╰─◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈◈─╯"
             )
         except FloodWait as e:
             time.sleep(e.x)
+    
