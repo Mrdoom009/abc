@@ -19,8 +19,8 @@ google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
 pycryptodome==3.18.0
-Pyrogram==2.0.106
-pyromod==1.5
+pyrofork
+tgcrypto
 PySocks==1.7.1
 python-dotenv==1.0.0
 requests==2.32.2
