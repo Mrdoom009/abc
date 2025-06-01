@@ -385,7 +385,7 @@ async def send_vid(bot: Client, msg: Message, cc, filename, thumb, name, prog):
     await thumb_process.wait()
     
     await prog.delete()
-    reply = await m.reply_text(f"🚀🚀𝗨𝗣𝗟𝗢𝗔𝗗𝗜𝗡𝗚🚀🚀🚀** » `{name}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥")
+    reply = await msg.reply_text(f"🚀🚀𝗨𝗣𝗟𝗢𝗔𝗗𝗜𝗡𝗚🚀🚀🚀** » `{name}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥")
 
     try:
         if thumb == "no" and os.path.exists(thumbnail_path):
@@ -394,7 +394,7 @@ async def send_vid(bot: Client, msg: Message, cc, filename, thumb, name, prog):
             thumbnail = thumb
             
         dur = await duration(filename)
-        processing_msg = await m.reply_text(emoji)
+        processing_msg = await msg.reply_text(emoji)
 
         try:
             await msg.reply_video(
