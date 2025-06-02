@@ -792,9 +792,9 @@ async def upload(bot: Client, msg: Message):
                 failed_count += 1
                 continue
 
-    except Exception as e:
-        await msg.reply_text(e)
-    await msg.reply_text(
+            except Exception as e:
+                await msg.reply_text(e)
+            await msg.reply_text(
         f"`✨𝗕𝗔𝗧𝗖𝗛 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨\n\n"
         f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
         f"📛𝗜𝗻𝗱𝗲𝘅 𝗥𝗮𝗻𝗴𝗲 » ({raw_text} to {len(links)})\n"
@@ -806,16 +806,16 @@ async def upload(bot: Client, msg: Message):
         f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
         f"✅𝗦𝗧𝗔𝗧𝗨𝗦 » 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗`"
     )
-    await msg.reply_text(f"<pre><code>📥𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤『{CR}』</code></pre>")
-    await msg.reply_text(f"<pre><code>『😏𝗥𝗲𝗮𝗰𝘁𝗶𝗼𝗻 𝗞𝗼𝗻 𝗗𝗲𝗴𝗮😏』</code></pre>")
+            await msg.reply_text(f"<pre><code>📥𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤『{CR}』</code></pre>")
+            await msg.reply_text(f"<pre><code>『😏𝗥𝗲𝗮𝗰𝘁𝗶𝗼𝗻 𝗞𝗼𝗻 𝗗𝗲𝗴𝗮😏』</code></pre>")
 
-    except asyncio.CancelledError:
-        await msg.reply_text("⏹️ **Operation stopped by user request**")
-    except Exception as e:
-        await msg.reply_text(f"❌ **Unexpected error:** {str(e)}")
-    finally:
+        except asyncio.CancelledError:
+            await msg.reply_text("⏹️ **Operation stopped by user request**")
+        except Exception as e:
+            await msg.reply_text(f"❌ **Unexpected error:** {str(e)}")
+        finally:
         # Clean up task tracking
-        if user_id in user_tasks:
-            del user_tasks[user_id]
+            if user_id in user_tasks:
+                del user_tasks[user_id]
 
-bot.run()
+        bot.run()
