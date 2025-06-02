@@ -568,7 +568,6 @@ async def upload(bot: Client, msg: Message):
                         except FloodWait as e:
                             await msg.reply_text(str(e))
                             time.sleep(e.x)
-                            continue
 
                     elif ".zip" in url:
                         try:
