@@ -136,15 +136,15 @@ async def start_command(bot: Client, msg: Message):
     start_message = f"""
 > Hᴇʟʟᴏ  [{msg.from_user.first_name}](tg://user?id={msg.from_user.id})
 
-Wᴇʟᴄᴏᴍᴇ ᴛᴏ Tᴇxᴛ Uᴘʟᴏᴀᴅᴇʀ Bᴏᴛ 🤖✨
+**Wᴇʟᴄᴏᴍᴇ ᴛᴏ Tᴇxᴛ Uᴘʟᴏᴀᴅᴇʀ Bᴏᴛ 🤖**✨
 
-➤ *ᴛᴏ Uᴘʟᴏᴅ α ᴛxᴛ ғɪʟᴇ:*  
+➤ --ᴛᴏ Uᴘʟᴏᴅ α ᴛxᴛ ғɪʟᴇ:--
   • sᴇɴᴅ /txt  
   • ᴛʜᴇɴ sᴇɴᴅ ʏᴏᴜʀ ᴛxᴛ ғɪʟᴇ.
-➤ *ᴛᴏ sᴛᴏᴘ ᴜᴘʟᴏᴀᴅɪɴɢ:*  
+➤ --ᴛᴏ sᴛᴏᴘ ᴜᴘʟᴏᴀᴅɪɴɢ:-- 
   • sᴇɴᴅ /stop
 
-🚀 _Exᴘᴇʀɪᴇɴᴄᴇ Lɪɢʜᴛɴɪɴɢ-ғᴀsᴛ Tᴇxᴛ Uᴘʟᴏᴀᴅs!_
+🚀 Exᴘᴇʀɪᴇɴᴄᴇ Lɪɢʜᴛɴɪɴɢ-ғᴀsᴛ Tᴇxᴛ Uᴘʟᴏᴀᴅs!
 """
     await msg.reply_text(
         start_message,
