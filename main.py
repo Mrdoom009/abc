@@ -5,7 +5,7 @@ import json
 import subprocess
 import random
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import FloodWait
 from p_bar import progress_bar
 from subprocess import getstatusoutput
@@ -14,14 +14,24 @@ import helper
 from logger import logging
 import time
 import asyncio
+from pyrogram.types import User, Message, enums
 import sys
 import re
 import os
-import shutil
+import urllib
+import urllib.parse
+import tgcrypto
 import cloudscraper
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64encode, b64decode
+from helper import *
+import aiohttp
+import aiofiles
+import zipfile
+import shutil
+import ffmpeg
+
 from config import API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, BIN_CHANNEL
 
 # Global dictionary to track user tasks
@@ -124,7 +134,7 @@ async def restart_handler(_, msg: Message):
 async def sudo_command(bot: Client, message: Message):
     user_id = message.from_user.id
     if user_id != OWNER_ID:
-        await message.reply_text("**🚫 You are not authorized to use this command.**")
+        await msg.reply_text("**🚫 You are not authorized to use this command.**")
         return
 
     try:
@@ -389,7 +399,6 @@ async def upload(bot: Client, msg: Message):
                         thumb = "no"
         else:
             thumb = "no"
-            
         failed_count = 0
         if len(links) == 1:
             count = 1
@@ -403,14 +412,14 @@ async def upload(bot: Client, msg: Message):
                     await msg.reply_text("🛑 **Operation cancelled by user request**")
                     return
 
-                V = (
-                    links[i][1]
-                    .replace("file/d/", "uc?export=download&id=")
-                    .replace("www.youtube-nocookie.com/embed", "youtu.be")
-                    .replace("?modestbranding=1", "")
-                    .replace("/view?usp=sharing", "")
-                )
-                url = "https://" + V
+            V = (
+                links[i][1]
+                .replace("file/d/", "uc?export=download&id=")
+                .replace("www.youtube-nocookie.com/embed", "youtu.be")
+                .replace("?modestbranding=1", "")
+                .replace("/view?usp=sharing", "")
+            )  # .replace("mpd","m3u8")
+            url = "https://" + V
 
             if "visionias" in url:
                 async with ClientSession() as session:
@@ -521,129 +530,285 @@ async def upload(bot: Client, msg: Message):
                 # vid_id =  url.split('/')[-2]
                 url = f"{api_url}pw-dl?url={url}&token={token}&authorization={api_token}&q={raw_text2}"
 
-                name1 = (
-                    links[i][0]
-                    .replace("\t", "")
-                    .replace(":", "")
-                    .replace("/", "")
-                    .replace("+", "")
-                    .replace("#", "")
-                    .replace("|", "")
-                    .replace("@", "")
-                    .replace("*", "")
-                    .replace(".", "")
-                    .replace("https", "")
-                    .replace("http", "")
-                    .strip()
-                )
-                name = f"{name1[:60]} "
-                output_path = os.path.join(user_dir, name)
+            name1 = (
+                links[i][0]
+                .replace("\t", "")
+                .replace(":", "")
+                .replace("/", "")
+                .replace("+", "")
+                .replace("#", "")
+                .replace("|", "")
+                .replace("@", "")
+                .replace("*", "")
+                .replace(".", "")
+                .replace("https", "")
+                .replace("http", "")
+                .strip()
+            )
+            name = f"{name1[:60]} "
 
-                if "youtu" in url:
-                    ytf = f"b[height<={raw_text2}][ext=mp4]/bv[height<={raw_text2}][ext=mp4]+ba[ext=m4a]/b[ext=mp4]"
-                else:
-                    ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
+            if "youtu" in url:
+                ytf = f"b[height<={raw_text2}][ext=mp4]/bv[height<={raw_text2}][ext=mp4]+ba[ext=m4a]/b[ext=mp4]"
+            else:
+                ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
 
-                if "jw-prod" in url:
-                    cmd = f'yt-dlp -o "{output_path}.mp4" "{url}"'
-                else:
-                    cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{output_path}.mp4"'
+            if "jw-prod" in url:
+                cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
+            else:
+                cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
-                try:
-                    cc = f"**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
-                    cc1 = f"**[📁] 𝗣𝗱𝗳_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.𝔗𝔲𝔰𝔥𝔞𝔯.pdf\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
+            try:
+                cc = f"**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
+                # cpw = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
+                cyt = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mp4\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
+                cpvod = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
+                cimg = f"**[📁] 𝗜𝗺𝗴_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.𝔗𝔲𝔰𝔥𝔞𝔯.jpg\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
+                cczip = f"**[📁] 𝗣𝗱𝗳_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.𝔗𝔲𝔰𝔥𝔞𝔯.zip\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
+                cc1 = f"**[📁] 𝗣𝗱𝗳_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.𝔗𝔲𝔰𝔥𝔞𝔯.pdf\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
 
-                    if "drive" in url:
-                        try:
-                            ka = await helper.download(url, output_path)
-                            # Send to bin channel
-                            await bot.send_document(
-                                chat_id=BIN_CHANNEL,
-                                document=ka,
-                                caption=cc1
-                            )
-                            count += 1
-                            os.remove(ka)
-                            time.sleep(1)
-                        except FloodWait as e:
-                            await msg.reply_text(str(e))
-                            time.sleep(e.x)
-
-                    elif ".zip" in url:
-                        try:
-                            zip_path = f"{output_path}.zip"
-                            download_cmd = f'yt-dlp -o "{zip_path}" "{url}" -R 25 --fragment-retries 25'
-                            os.system(download_cmd)
-                            # Send to bin channel
-                            await bot.send_document(
-                                chat_id=BIN_CHANNEL,
-                                document=zip_path,
-                                caption=cc1
-                            )
-                            count += 1
-                            os.remove(zip_path)
-                        except FloodWait as e:
-                            await msg.reply_text(str(e))
-                            time.sleep(e.x)
-                            count += 1
-                            pass
-
-                    # ... (handle other file types similarly, sending to BIN_CHANNEL)
-
-                    else:  # Video handling
-                        emoji_message = await show_random_emojis(msg)
-                        remaining_links = len(links) - count
-                        Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
-                        prog = await msg.reply_text(Show)
-
-                        res_file = await helper.download_video(url, cmd, output_path)
-                        filename = res_file
-                        await prog.delete(True)
-                        await emoji_message.delete()
-                        
-                        # Send to bin channel
-                        await helper.send_vid(
-                            bot=bot,
-                            chat_id=BIN_CHANNEL,
-                            cc=cc,
-                            filename=filename,
-                            thumb=thumb,
-                            name=name
+                if "drive" in url:
+                    try:
+                        ka = await helper.download(url, name)
+                        copy = await bot.send_document(
+                            chat_id=m.chat.id, document=ka, caption=cc1
                         )
                         count += 1
+                        os.remove(ka)
                         time.sleep(1)
+                    except FloodWait as e:
+                        await msg.reply_text(str(e))
+                        time.sleep(e.x)
+                        continue
 
-                except Exception as e:
-                    error_details = f"‼️𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗙𝗮𝗶𝗹𝗲𝗱‼️\n\n"\
-                       f"📝𝗡𝗮𝗺𝗲 » `{name}`\n\n"\
-                       f"🔗𝗨𝗿𝗹 » {url}\n\n"\
-                       f"⚠️𝗘𝗿𝗿𝗼𝗿 » `{str(e)}`"
-        
-                    await msg.reply_text(error_details)
-                    logging.error(f"Download failed for {name}: {str(e)}")
-        
+                elif ".zip" in url:
+                    try:
+                        cmd = f'yt-dlp -o "{name}.zip" "{url}"'
+                        download_cmd = f"{cmd} -R 25 --fragment-retries 25"
+                        os.system(download_cmd)
+                        copy = await bot.send_document(
+                            chat_id=m.chat.id, document=f"{name}.zip", caption=cczip
+                        )
+                        count += 1
+                        os.remove(f"{name}.zip")
+                    except FloodWait as e:
+                        await msg.reply_text(str(e))
+                        time.sleep(e.x)
+                        count += 1
+                        pass
+
+                elif "pdf*" in url:
+                    pdf_key = url.split("*")[1]
+                    url = url.split("*")[0]
+                    pdf_enc = await helper.download_and_decrypt_pdf(url, name, pdf_key)
+                    copy = await bot.send_document(
+                        chat_id=m.chat.id, document=pdf_enc, caption=cc1
+                    )
                     count += 1
-                    failed_count += 1
+                    os.remove(pdf_enc)
                     continue
 
-        except Exception as e:
-            await msg.reply_text(str(e))
-        
-        await msg.reply_text(
-            f"`✨𝗕𝗔𝗧𝗖𝗛 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨\n\n"
-            f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-            f"📛𝗜𝗻𝗱𝗲𝘅 𝗥𝗮𝗻𝗴𝗲 » ({raw_text} to {len(links)})\n"
-            f"📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 » {b_name}\n\n"
-            f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-            f"✨𝗧𝗫𝗧 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨ : {len(links)}\n"
-            f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-            f"🔹𝗩𝗶𝗱𝗲𝗼 » {video_count}\n🔹𝗣𝗱𝗳 » {pdf_count}\n🔹𝗜𝗺𝗴 » {img_count}\n🔹𝗭𝗶𝗽 » {zip_count}\n🔹𝗙𝗮𝗶𝗹𝗲𝗱 𝗨𝗿𝗹 » {failed_count}\n\n"
-            f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-            f"✅𝗦𝗧𝗔𝗧𝗨𝗦 » 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗`"
-        )
-        await msg.reply_text(f"<pre><code>📥𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤『{CR}』</code></pre>")
-        await msg.reply_text(f"<pre><code>『😏𝗥𝗲𝗮𝗰𝘁𝗶𝗼𝗻 𝗞𝗼𝗻 𝗗𝗲𝗴𝗮😏』</code></pre>")
-    
+                elif ".pdf" in url:
+                    try:
+                        await asyncio.sleep(4)
+                        # Replace spaces with %20 in the URL
+                        url = url.replace(" ", "%20")
+
+                        # Create a cloudscraper session
+                        scraper = cloudscraper.create_scraper()
+
+                        # Send a GET request to download the PDF
+                        response = scraper.get(url)
+
+                        # Check if the response status is OK
+                        if response.status_code == 200:
+                            # Write the PDF content to a file
+                            with open(f"{name}.pdf", "wb") as file:
+                                file.write(response.content)
+
+                            # Send the PDF document
+                            await asyncio.sleep(4)
+                            copy = await bot.send_document(
+                                chat_id=m.chat.id, document=f"{name}.pdf", caption=cc1
+                            )
+                            count += 1
+
+                            # Remove the PDF file after sending
+                            os.remove(f"{name}.pdf")
+                        else:
+                            await msg.reply_text(
+                                f"Failed to download PDF: {response.status_code} {response.reason}"
+                            )
+
+                    except FloodWait as e:
+                        await msg.reply_text(str(e))
+                        time.sleep(e.x)
+                        continue
+
+                elif ".pdf" in url:
+                    try:
+                        if (
+                            "cwmediabkt99" in url
+                        ):  # if cw urls pdf is found if error then contact me with error
+                            time.sleep(2)
+                            cmd = f'yt-dlp -o "{name}.pdf" "https://master-api-v3.vercel.app/cw-pdf?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"'
+                            download_cmd = f"{cmd} -R 25 --fragment-retries 25"
+                            os.system(download_cmd)
+                            copy = await bot.send_document(
+                                chat_id=m.chat.id, document=f"{name}.pdf", caption=cc1
+                            )
+                            count += 1
+                            os.remove(f"{name}.pdf")
+
+                        else:
+                            cmd = f'yt-dlp -o "{name}.pdf" "{url}"'
+                            download_cmd = f"{cmd} -R 25 --fragment-retries 25"
+                            # os.system(download_cmd)
+                            # file_path= f'{name}.pdf'
+                            # new_file_path = await helper.watermark_pdf(file_path, watermark_text)
+                            # copy = await bot.send_document(chat_id=m.chat.id, document=new_file_path, caption=cc1)
+                            os.system(download_cmd)
+                            copy = await bot.send_document(
+                                chat_id=m.chat.id, document=f"{name}.pdf", caption=cc1
+                            )
+                            count += 1
+                            # os.remove(new_file_path)
+                            os.remove(f"{name}.pdf")
+
+                    except FloodWait as e:
+                        await msg.reply_text(str(e))
+                        time.sleep(e.x)
+                        continue
+
+                elif any(img in url.lower() for img in [".jpeg", ".png", ".jpg"]):
+                    try:
+                        subprocess.run(
+                            ["wget", url, "-O", f"{name}.jpg"], check=True
+                        )  # Fixing this line
+                        await bot.send_photo(
+                            chat_id=m.chat.id,
+                            caption=cimg,
+                            photo=f"{name}.jpg",
+                        )
+                        count += 1
+                        await asyncio.sleep(1)
+                        continue
+                    except subprocess.CalledProcessError:
+                        await msg.reply(
+                            "Failed to download the image. Please check the URL."
+                        )
+                    except Exception as e:
+                        await msg.reply(f"An error occurred: {e}")
+                    finally:
+                        # Clean up the downloaded file
+                        if os.path.exists(f"{name}.jpg"):
+                            os.remove(f"{name}.jpg")
+
+                elif "youtu" in url:
+                    try:
+                        await bot.send_photo(
+                            chat_id=m.chat.id, photo=photo, caption=cyt
+                        )
+                        count += 1
+                    except Exception as e:
+                        await msg.reply_text(str(e))
+                        await asyncio.sleep(1)
+                        continue
+
+                elif ".ws" in url and url.endswith(".ws"):
+                    try:
+                        await helper.pdf_download(
+                            f"{api_url}utkash-ws?url={url}&authorization={api_token}",
+                            f"{name}.html",
+                        )
+                        time.sleep(1)
+                        await bot.send_document(
+                            chat_id=m.chat.id, document=f"{name}.html", caption=cc1
+                        )
+                        os.remove(f"{name}.html")
+                        count += 1
+                        time.sleep(5)
+                    except FloodWait as e:
+                        await asyncio.sleep(e.x)
+                        await msg.reply_text(str(e))
+                        continue
+
+                elif "encrypted.m" in url:
+                    emoji_message = await show_random_emojis(message)
+                    remaining_links = len(links) - count
+                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    prog = await msg.reply_text(Show)
+                    res_file = await helper.download_and_decrypt_video(
+                        url, cmd, name, appxkey
+                    )
+                    filename = res_file
+
+                    await prog.delete(True)
+                    await emoji_message.delete()
+                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                    count += 1
+                    await asyncio.sleep(1)
+                    continue
+
+                elif "drmcdni" in url or "drm/wv" in url:
+                    emoji_message = await show_random_emojis(message)
+                    remaining_links = len(links) - count
+                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    prog = await msg.reply_text(Show)
+                    # Use the decrypt_and_merge_video function
+                    res_file = await helper.decrypt_and_merge_video(
+                        mpd, keys_string, path, name, raw_text2
+                    )
+
+                    filename = res_file
+                    await prog.delete(True)
+                    await emoji_message.delete()
+                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                    count += 1
+                    await asyncio.sleep(1)
+                    continue
+
+                else:
+                    emoji_message = await show_random_emojis(message)
+                    remaining_links = len(links) - count
+                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    prog = await msg.reply_text(Show)
+
+                    res_file = await helper.download_video(url, cmd, name)
+                    filename = res_file
+                    await prog.delete(True)
+                    await emoji_message.delete()
+                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                    count += 1
+                    time.sleep(1)
+
+            except Exception as e:
+                await msg.reply_text(
+                    f"‼️𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗙𝗮𝗶𝗹𝗲𝗱‼️\n\n"
+                    f"📝𝗡𝗮𝗺𝗲 » `{name}`\n\n"
+                    f'🔗𝗨𝗿𝗹 » <a href="{url}">__**Click Here to See Link**__</a>`'
+                )
+
+                count += 1
+                failed_count += 1
+                continue
+
+    except Exception as e:
+        await msg.reply_text(e)
+    await msg.reply_text(
+        f"`✨𝗕𝗔𝗧𝗖𝗛 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨\n\n"
+        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+        f"📛𝗜𝗻𝗱𝗲𝘅 𝗥𝗮𝗻𝗴𝗲 » ({raw_text} to {len(links)})\n"
+        f"📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 » {b_name}\n\n"
+        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+        f"✨𝗧𝗫𝗧 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨ : {len(links)}\n"
+        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+        f"🔹𝗩𝗶𝗱𝗲𝗼 » {video_count}\n🔹𝗣𝗱𝗳 » {pdf_count}\n🔹𝗜𝗺𝗴 » {img_count}\n🔹𝗭𝗶𝗽 » {zip_count}\n🔹𝗙𝗮𝗶𝗹𝗲𝗱 𝗨𝗿𝗹 » {failed_count}\n\n"
+        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+        f"✅𝗦𝗧𝗔𝗧𝗨𝗦 » 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗`"
+    )
+    await msg.reply_text(f"<pre><code>📥𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤『{CR}』</code></pre>")
+    await msg.reply_text(f"<pre><code>『😏𝗥𝗲𝗮𝗰𝘁𝗶𝗼𝗻 𝗞𝗼𝗻 𝗗𝗲𝗴𝗮😏』</code></pre>")
+
     except asyncio.CancelledError:
         await msg.reply_text("⏹️ **Operation stopped by user request**")
     except Exception as e:
