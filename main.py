@@ -148,7 +148,6 @@ Wᴇʟᴄᴏᴍᴇ ᴛᴏ Tᴇxᴛ Uᴘʟᴏᴀᴅᴇʀ Bᴏᴛ 🤖✨
 """
     await msg.reply_text(
         start_message,
-        parse_mode="markdown",
         disable_web_page_preview=True
     )
 
