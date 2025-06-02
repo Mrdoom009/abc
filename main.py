@@ -4,11 +4,9 @@ import m3u8
 import json
 import subprocess
 import random
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram import Client, filters, enums
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, User, Message
 from pyrogram.errors import FloodWait
-from pyrogram.types import Message
-from pyrogram import enums
 from p_bar import progress_bar
 from subprocess import getstatusoutput
 from aiohttp import ClientSession
@@ -16,7 +14,6 @@ import helper
 from logger import logging
 import time
 import asyncio
-from pyrogram.types import User, Message
 import sys
 import re
 import os
@@ -134,59 +131,25 @@ async def sudo_command(bot: Client, message: Message):
         await message.reply_text(f"**Error:** {str(e)}")
 
 
-# Inline keyboard for start command
-keyboard = InlineKeyboardMarkup(
-    [
-        [InlineKeyboardButton("🇮🇳ʙᴏᴛ ᴍᴀᴅᴇ ʙʏ🇮🇳", url=f"https://t.me/newstudent1885")],
-        [
-            InlineKeyboardButton(
-                "🔔ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ🔔", url="https://t.me/+dXRSrF1762o5NmRl"
-            )
-        ],
-        [InlineKeyboardButton("🦋ғᴏʟʟᴏᴡ ᴜs🦋", url="https://t.me/+dXRSrF1762o5NmRl")],
-    ]
-)
+@bot.on_message(filters.command("start"))
+async def start_command(bot: Client, msg: Message):
+    start_message = f"""
+> Hᴇʟʟᴏ  [{msg.from_user.first_name}](tg://user?id={msg.from_user.id})
 
-# Image URLs for the random image feature
-image_urls = [
-    "https://graph.org/file/996d4fc24564509244988-a7d93d020c96973ba8.jpg",
-    "https://graph.org/file/96d25730136a3ea7e48de-b0a87a529feb485c8f.jpg",
-    "https://graph.org/file/6593f76ddd8c735ae3ce2-ede9fa2df40079b8a0.jpg",
-    "https://graph.org/file/a5dcdc33020aa7a488590-79e02b5a397172cc35.jpg",
-    "https://graph.org/file/0346106a432049e391181-7560294e8652f9d49d.jpg",
-    "https://graph.org/file/ba49ebe9a8e387addbcdc-be34c4cd4432616699.jpg",
-    "https://graph.org/file/26f98dec8b3966687051f-557a430bf36b660e24.jpg",
-    "https://graph.org/file/2ae78907fa4bbf3160ffa-2d69cd23fa75cb0c3a.jpg",
-    "https://graph.org/file/05ef9478729f165809dd7-3df2f053d2842ed098.jpg",
-    "https://graph.org/file/b1330861fed21c4d7275c-0f95cca72c531382c1.jpg",
-    "https://graph.org/file/0ebb95807047b062e402a-9e670a0821d74e3306.jpg",
-    "https://graph.org/file/b4e5cfd4932d154ad6178-7559c5266426c0a399.jpg",
-    "https://graph.org/file/44ffab363c1a2647989bc-00e22c1e36a9fd4156.jpg",
-    "https://graph.org/file/5f0980969b54bb13f2a8a-a3e131c00c81c19582.jpg",
-    "https://graph.org/file/6341c0aa94c803f94cdb5-225b2999a89ff87e39.jpg",
-    "https://graph.org/file/90c9f79ec52e08e5a3025-f9b73e9d17f3da5040.jpg",
-    "https://graph.org/file/1aaf27a49b6bd81692064-30016c0a382f9ae22b.jpg",
-    "https://graph.org/file/702aa31236364e4ebb2be-3f88759834a4b164a0.jpg",
-    "https://graph.org/file/d0c6b9f6566a564cd7456-27fb594d26761d3dc0.jpg",
-    # Add more image URLs as needed
-]
-random_image_url = random.choice(image_urls)
-# Caption for the image
-caption = (
-    "**ʜᴇʟʟᴏ👋**\n\n"
-    "➠ **ɪ ᴀᴍ ᴛxᴛ ᴛᴏ ᴠɪᴅᴇᴏ ᴜᴘʟᴏᴀᴅᴇʀ ʙᴏᴛ.**\n"
-    "➠ **ғᴏʀ ᴜsᴇ ᴍᴇ sᴇɴᴅ /tushar.\n"
-    "➠ **ғᴏʀ ɢᴜɪᴅᴇ sᴇɴᴅ /help."
-)
+Wᴇʟᴄᴏᴍᴇ ᴛᴏ Tᴇxᴛ Uᴘʟᴏᴀᴅᴇʀ Bᴏᴛ 🤖✨
 
-# Start command handler
-@bot.on_message(filters.command(["start2"]))
-async def start_command(bot: Client, message: Message):
-    await bot.send_photo(
-        chat_id=message.chat.id,
-        photo=random_image_url,
-        caption=caption,
-        reply_markup=keyboard,
+➤ *ᴛᴏ Uᴘʟᴏᴅ α ᴛxᴛ ғɪʟᴇ:*  
+  • sᴇɴᴅ /txt  
+  • ᴛʜᴇɴ sᴇɴᴅ ʏᴏᴜʀ ᴛxᴛ ғɪʟᴇ.
+➤ *ᴛᴏ sᴛᴏᴘ ᴜᴘʟᴏᴀᴅɪɴɢ:*  
+  • sᴇɴᴅ /stop
+
+🚀 _Exᴘᴇʀɪᴇɴᴄᴇ Lɪɢʜᴛɴɪɴɢ-ғᴀsᴛ Tᴇxᴛ Uᴘʟᴏᴀᴅs!_
+"""
+    await msg.reply_text(
+        start_message,
+        parse_mode="markdown",
+        disable_web_page_preview=True
     )
 
 
@@ -730,7 +693,7 @@ async def upload(bot: Client, msg: Message):
                 elif "drmcdni" in url or "drm/wv" in url:
                     emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
-                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**>🔗ᴜʀʟ » {url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
                     prog = await msg.reply_text(Show)
                     # Use the decrypt_and_merge_video function
                     res_file = await helper.decrypt_and_merge_video(
@@ -748,7 +711,7 @@ async def upload(bot: Client, msg: Message):
                 else:
                     emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
-                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ »** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**>🔗ᴜʀʟ » {url}\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
                     prog = await msg.reply_text(Show)
 
                     res_file = await helper.download_video(url, cmd, name)
