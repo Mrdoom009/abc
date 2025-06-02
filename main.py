@@ -167,7 +167,7 @@ async def upload(bot: Client, msg: Message):
             return
         
         # Download to user-specific directory
-        y = await input_msg.download(file_name=os.path.join(user_dir, os.path.basename(input_msg.document.file_name))
+        y = await input_msg.download(file_name=os.path.join(user_dir, os.path.basename(input_msg.document.file_name)))
         await input_msg.delete()
         file_name, ext = os.path.splitext(os.path.basename(y))
         
