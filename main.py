@@ -4,7 +4,7 @@ import m3u8
 import json
 import subprocess
 import random
-from pyrogram import Client, filters, enums
+from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors import FloodWait
 from p_bar import progress_bar
@@ -14,7 +14,7 @@ import helper
 from logger import logging
 import time
 import asyncio
-from pyrogram.types import User, Message
+from pyrogram.types import User, Message, enums
 import sys
 import re
 import os
@@ -44,10 +44,9 @@ token_cp = "eyJjb3Vyc2VJZCI6IjQ1NjY4NyIsInR1dG9ySWQiOm51bGwsIm9yZ0lkIjo0ODA2MTks
 
 # Define the owner's user ID
 OWNER_ID = 6400973182
-SUDO_USERS = [6400973182]
 
-def is_authorized(user_id: int) -> bool:
-    return user_id == OWNER_ID or user_id in SUDO_USERS
+def is_owner(user_id: int) -> bool:
+    return user_id == OWNER_ID
 
 # Initialize bot
 bot = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -110,7 +109,7 @@ async def stop_handler(_, msg: Message):
 # Restart command handler - full bot restart (owner only)
 @bot.on_message(filters.command("restart"))
 async def restart_handler(_, msg: Message):
-    if not is_authorized(msg.from_user.id):
+    if not is_owner(msg.from_user.id):
         await msg.reply_text("**🚫 You are not authorized to use this command.**")
         return
     
@@ -141,7 +140,7 @@ async def start_command(bot: Client, msg: Message):
 ➤ --ᴛᴏ sᴛᴏᴘ ᴜᴘʟᴏᴀᴅɪɴɢ:-- 
   • sᴇɴᴅ /stop
 
-🚀 Exᴘᴇʀɪᴇɴᴄᴇ Lɪɢʜᴛɴɪɴɢ-ғᴀsᴛ Tᴇxᴛ Uᴘʟᴏᴀᴅs!
+🚀 Exᴘᴇʀɪᴇɴᴄᴇ Lɪɢʜᴛɴɪɴɢ-ғᴀsᴛ Tᴇxᴛ Uᴘʟᴼᴀᴅs!
 """
     await msg.reply_text(
         start_message,
@@ -168,7 +167,7 @@ async def upload(bot: Client, msg: Message):
             return
         
         # Download to user-specific directory
-        y = await input_msg.download(file_name=os.path.join(user_dir, os.path.basename(input_msg.document.file_name)))
+        y = await input_msg.download(file_name=os.path.join(user_dir, os.path.basename(input_msg.document.file_name))
         await input_msg.delete()
         file_name, ext = os.path.splitext(os.path.basename(y))
         
@@ -446,7 +445,7 @@ async def upload(bot: Client, msg: Message):
                         )
                         url = f"https://master-api-v3.vercel.app/allenplus-vimeo?url={url0}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
                     else:
-                        url = f"https://master-api-v3.vercel.app/allenplus-vimeo?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
+                        url = f"https://master-api-v3.vercel.app/allenplus-vimeo?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA7N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
 
                 elif url.startswith("https://videotest.adda247.com/"):
                     if url.split("/")[3] != "demo":
@@ -485,7 +484,6 @@ async def upload(bot: Client, msg: Message):
 
                 try:
                     cc = f"**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
-                    # cpw = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
                     cyt = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mp4\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
                     cpvod = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
                     cimg = f"**[📁] 𝗜𝗺𝗴_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.𝔗𝔲𝔰𝔥𝔞𝔯.jpg\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
@@ -574,7 +572,7 @@ async def upload(bot: Client, msg: Message):
                         try:
                             if (
                                 "cwmediabkt99" in url
-                            ):  # if cw urls pdf is found if error then contact me with error
+                            ):
                                 time.sleep(2)
                                 cmd = f'yt-dlp -o "{name}.pdf" "https://master-api-v3.vercel.app/cw-pdf?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"'
                                 download_cmd = f"{cmd} -R 25 --fragment-retries 25"
@@ -588,16 +586,11 @@ async def upload(bot: Client, msg: Message):
                             else:
                                 cmd = f'yt-dlp -o "{name}.pdf" "{url}"'
                                 download_cmd = f"{cmd} -R 25 --fragment-retries 25"
-                                # os.system(download_cmd)
-                                # file_path= f'{name}.pdf'
-                                # new_file_path = await helper.watermark_pdf(file_path, watermark_text)
-                                # copy = await bot.send_document(chat_id=m.chat.id, document=new_file_path, caption=cc1)
                                 os.system(download_cmd)
                                 copy = await bot.send_document(
                                     chat_id=msg.chat.id, document=f"{name}.pdf", caption=cc1
                                 )
                                 count += 1
-                                # os.remove(new_file_path)
                                 os.remove(f"{name}.pdf")
 
                         except FloodWait as e:
@@ -609,7 +602,7 @@ async def upload(bot: Client, msg: Message):
                         try:
                             subprocess.run(
                                 ["wget", url, "-O", f"{name}.jpg"], check=True
-                            )  # Fixing this line
+                            )
                             await bot.send_photo(
                                 chat_id=msg.chat.id,
                                 caption=cimg,
@@ -625,7 +618,6 @@ async def upload(bot: Client, msg: Message):
                         except Exception as e:
                             await msg.reply(f"An error occurred: {e}")
                         finally:
-                            # Clean up the downloaded file
                             if os.path.exists(f"{name}.jpg"):
                                 os.remove(f"{name}.jpg")
 
@@ -680,7 +672,6 @@ async def upload(bot: Client, msg: Message):
                         remaining_links = len(links) - count
                         Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
                         prog = await msg.reply_text(Show)
-                        # Use the decrypt_and_merge_video function
                         res_file = await helper.decrypt_and_merge_video(
                             mpd, keys_string, path, name, raw_text2
                         )
@@ -713,7 +704,6 @@ async def upload(bot: Client, msg: Message):
                         f"📝𝗡𝗮𝗺𝗲 » `{name}`\n\n"
                         f'🔗𝗨𝗿𝗹 » <a href="{url}">__**Click Here to See Link**__</a>`'
                     )
-
                     count += 1
                     failed_count += 1
                     continue
@@ -742,4 +732,5 @@ async def upload(bot: Client, msg: Message):
             if user_id in user_tasks:
                 del user_tasks[user_id]
 
-        bot.run()
+# This should be at the very bottom, outside all functions
+bot.run()
