@@ -95,7 +95,7 @@ async def progress_bar(current, total, reply, start):
 
         try:
             await reply.edit(
-                f"╭─────────────────────╮\n│      **Uᴘʟᴏᴀᴅɪɴɢ**\n├─────────────────────\n{progress_bar}\n│ **Sᴘᴇᴇᴅ** ➠ {sp}\n│ **Pʀᴏɢʀᴇss** ➠ {perc}\n│ **ᴅᴏɴᴇ** ➠ {cur}/{tot}\n│ **Eᴛᴀ** ➠ {eta}\n╰─────────────────────╯"
+                f"╭─────────────────────╮\n│      **Uᴘʟᴏᴀᴅɪɴɢ**\n├─────────────────────\n│ {progress_bar}\n│ **Sᴘᴇᴇᴅ** ➠ {sp}\n│ **Pʀᴏɢʀᴇss** ➠ {perc}\n│ **ᴅᴏɴᴇ** ➠ {cur}/{tot}\n│ **Eᴛᴀ** ➠ {eta}\n╰─────────────────────╯"
             )
         except FloodWait as e:
             time.sleep(e.x)
