@@ -138,7 +138,7 @@ async def start_command(bot: Client, msg: Message):
 
 **Wᴇʟᴄᴏᴍᴇ ᴛᴏ Tᴇxᴛ Uᴘʟᴏᴀᴅᴇʀ Bᴏᴛ 🤖**✨
 
-➤ --ᴛᴏ Uᴘʟᴏᴅ α ᴛxᴛ ғɪʟᴇ:--
+➤ --ᴛᴏ Uᴘʟᴏaᴅ α ᴛxᴛ ғɪʟᴇ:--
   • sᴇɴᴅ /txt  
   • ᴛʜᴇɴ sᴇɴᴅ ʏᴏᴜʀ ᴛxᴛ ғɪʟᴇ.
 ➤ --ᴛᴏ sᴛᴏᴘ ᴜᴘʟᴏᴀᴅɪɴɢ:-- 
@@ -153,13 +153,13 @@ async def start_command(bot: Client, msg: Message):
 
 
 # Stop command handler
-@bot.on_message(filters.command("stop2"))
+@bot.on_message(filters.command("stop"))
 async def restart_handler(_, msg: Message):
     await msg.reply_text("**𝗦𝘁𝗼𝗽𝗽𝗲𝗱**🚦", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
-@bot.on_message(filters.command("restart2"))
+@bot.on_message(filters.command("restart"))
 async def restart_handler(_, msg):
     if not is_authorized(msg.from_user.id):
         await msg.reply_text("**🚫 You are not authorized to use this command.**")
@@ -169,7 +169,7 @@ async def restart_handler(_, msg):
 
 
 # List users command
-@bot.on_message(filters.command("userlist2") & filters.user(SUDO_USERS))
+@bot.on_message(filters.command("userlist") & filters.user(SUDO_USERS))
 async def list_users(client: Client, msg: Message):
     if SUDO_USERS:
         users_list = "\n".join([f"User ID : `{user_id}`" for user_id in SUDO_USERS])
@@ -178,22 +178,7 @@ async def list_users(client: Client, msg: Message):
         await msg.reply_text("No sudo users.")
 
 
-# Help command
-@bot.on_message(filters.command("help"))
-async def help_command(client: Client, msg: Message):
-    help_text = (
-        "`/start` - Start the bot⚡\n\n"
-        "`/tushar2` or `/uplaod2` - Download and upload files (sudo)🎬\n\n"
-        "`/restart2` - Restart the bot🔮\n\n"
-        "`/stop2` - Stop ongoing process🛑\n\n"
-        "`/sudo add` - Add user or group or channel (owner)🎊\n\n"
-        "`/sudo remove` - Remove user or group or channel (owner)❌\n\n"
-        "`/userlist2` - List of sudo user or group or channel📜\n\n"
-    )
-    await msg.reply_text(help_text)
-
-
-@bot.on_message(filters.command(["tushar2", "upload2"]))
+@bot.on_message(filters.command("txt"))
 async def upload(bot: Client, msg: Message):
     editable = await msg.reply_text(f"⚡𝗦𝗘𝗡𝗗 𝗧𝗫𝗧 𝗙𝗜𝗟𝗘⚡")
     input_msg = await wait_for_message(msg.chat.id)
@@ -241,7 +226,7 @@ async def upload(bot: Client, msg: Message):
         os.remove(x)
         return
     
-    await editable.edit(f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n🔹Img : {img_count}  🔹Pdf : {pdf_count}\n🔹Zip : {zip_count}  🔹Video : {video_count}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`")
+    await editable.edit(f"`𝗧𝗼𝘁𝗮𝗹 🔗 𝗟𝗶𝗻𝗸𝘀 𝗙𝗼𝘂𝗻𝗱 𝗔𝗿𝗲 {len(links)}\n\n𝗦𝗲𝗻𝗱 𝗙𝗿𝗼𝗺 𝗪𝗵𝗲𝗿𝗲 𝗬𝗼𝘂 𝗪𝗮𝗻𝘁 𝗧𝗼 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱.`")
     
     input0 = await wait_for_message(msg.chat.id)
     if not input0:
@@ -254,17 +239,17 @@ async def upload(bot: Client, msg: Message):
     except:
         arg = 1
     
-    await editable.edit("📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠")
-    input1 = await wait_for_message(msg.chat.id)
-    if not input1:
-        await editable.edit("**🚫 No input received. Process cancelled.**")
-        return
-    raw_text0 = input1.text
-    await input1.delete()
-    if raw_text0 == "1":
-        b_name = file_name
-    else:
-        b_name = raw_text0
+#    await editable.edit("📚 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 📚\n\n🦠 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🦠")
+#    input1 = await wait_for_message(msg.chat.id)
+#    if not input1:
+#        await editable.edit("**🚫 No input received. Process cancelled.**")
+#        return
+#    raw_text0 = input1.text
+#    await input1.delete()
+#    if raw_text0 == "1":
+#        b_name = file_name
+#    else:
+#        b_name = raw_text0
     
     await editable.edit("**📸 𝗘𝗻𝘁𝗲𝗿 𝗥𝗲𝘀𝗼𝗹𝘂𝘁𝗶𝗼𝗻 📸**\n➤ `144`\n➤ `240`\n➤ `360`\n➤ `480`\n➤ `720`\n➤ `1080`")
     input2 = await wait_for_message(msg.chat.id)
@@ -291,38 +276,38 @@ async def upload(bot: Client, msg: Message):
     except Exception:
         res = "UN"
     
-    await editable.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
-    input3 = await wait_for_message(msg.chat.id)
-    if not input3:
-        await editable.edit("**🚫 No input received. Process cancelled.**")
-        return
-    raw_text3 = input3.text
-    await input3.delete()
-    credit = "️[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
-    if raw_text3 == "1":
-        CR = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
-    elif raw_text3:
-        try:
-            text, link = raw_text3.split(",")
-            CR = f"[{text.strip()}]({link.strip()})"
-        except ValueError:
-            CR = raw_text3
-    else:
-        CR = credit
+#    await editable.edit("📛 𝗘𝗻𝘁𝗲𝗿 𝗬𝗼𝘂𝗿 𝗡𝗮𝗺𝗲 📛\n\n🐥 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗨𝘀𝗲 𝗗𝗲𝗳𝗮𝘂𝗹𝘁 🐥")
+#    input3 = await wait_for_message(msg.chat.id)
+#    if not input3:
+#        await editable.edit("**🚫 No input received. Process cancelled.**")
+#        return
+#    raw_text3 = input3.text
+#    await input3.delete()
+#    credit = "️[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
+#    if raw_text3 == "1":
+#        CR = "[𝗧𝘂𝘀𝗵𝗮𝗿](https://t.me/newstudent1885)"
+#    elif raw_text3:
+#        try:
+#            text, link = raw_text3.split(",")
+#            CR = f"[{text.strip()}]({link.strip()})"
+#        except ValueError:
+#            CR = raw_text3
+#    else:
+#        CR = credit
     
-    await editable.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `3` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
+    await editable.edit("**𝗘𝗻𝘁𝗲𝗿 𝗣𝘄 𝗧𝗼𝗸𝗲𝗻 𝗙𝗼𝗿 𝗣𝘄 𝗨𝗽𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗼𝗿 𝗦𝗲𝗻𝗱 `1` 𝗙𝗼𝗿 𝗢𝘁𝗵𝗲𝗿𝘀**")
     input4 = await wait_for_message(msg.chat.id)
     if not input4:
         await editable.edit("**🚫 No input received. Process cancelled.**")
         return
     raw_text4 = input4.text
     await input4.delete()
-    if raw_text4 == 3:
+    if raw_text4 == 1:
         MR = token_cp
     else:
         MR = raw_text4
     
-    await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹 𝗘𝗴 » https://graph.org/file/13a89d77002442255efad-989ac290c1b3f13b44.jpg\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = 𝗻𝗼")
+    await editable.edit("𝗡𝗼𝘄 𝗦𝗲𝗻𝗱 𝗧𝗵𝗲 𝗧𝗵𝘂𝗺𝗯 𝗨𝗿𝗹\n\n𝗢𝗿 𝗜𝗳 𝗗𝗼𝗻'𝘁 𝗪𝗮𝗻𝘁 𝗧𝗵𝘂𝗺𝗯𝗻𝗮𝗶𝗹 𝗦𝗲𝗻𝗱 = `no`")
     input6 = await wait_for_message(msg.chat.id)
     if not input6:
         await editable.edit("**🚫 No input received. Process cancelled.**")
@@ -498,12 +483,12 @@ async def upload(bot: Client, msg: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                cc = f"{str(count).zfill(3)}🍃 Title « {name1}"
-                # cpw = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
-                cyt = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mp4\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
-                cpvod = f'**[🎬] 𝗩𝗶𝗱_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.({res}).𝔗𝔲𝔰𝔥𝔞𝔯.mkv\n\n\n🔗𝗩𝗶𝗱𝗲𝗼 𝗨𝗿𝗹 ➤ <a href="{url}">__Click Here to Watch Video__</a>\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**'
-                cimg = f"**[📁] 𝗜𝗺𝗴_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.𝔗𝔲𝔰𝔥𝔞𝔯.jpg\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
-                cczip = f"**[📁] 𝗣𝗱𝗳_𝗜𝗱 : {str(count).zfill(3)}.\n\n\n☘️𝗧𝗶𝘁𝗹𝗲 𝗡𝗮𝗺𝗲 ➤ {name1}.𝔗𝔲𝔰𝔥𝔞𝔯.zip\n\n\n<pre><code>📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 ➤ {b_name}</code></pre>\n\n\n📥 𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤  {CR}**"
+                cc = f">{str(count).zfill(3)}\n{name1}"
+                # cpw = f">{str(count).zfill(3)}\n{name1}"
+                cyt = f">{str(count).zfill(3)}\n{name1}"
+                cpvod = f">{str(count).zfill(3)}\n{name1}"
+                cimg = f">{str(count).zfill(3)}\n{name1}"
+                cczip = f">{str(count).zfill(3)}\n{name1}"
                 cc1 = f" "
 
                 if "drive" in url:
@@ -671,7 +656,7 @@ async def upload(bot: Client, msg: Message):
                 elif "encrypted.m" in url:
                     emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
-                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    Show = f"**Downloading**\n\n**>{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**>{url}"
                     prog = await msg.reply_text(Show)
                     res_file = await helper.download_and_decrypt_video(
                         url, cmd, name, appxkey
@@ -688,7 +673,7 @@ async def upload(bot: Client, msg: Message):
                 elif "drmcdni" in url or "drm/wv" in url:
                     emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
-                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    Show = f"**Downloading**\n\n**>{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**>{url}"
                     prog = await msg.reply_text(Show)
                     # Use the decrypt_and_merge_video function
                     res_file = await helper.decrypt_and_merge_video(
@@ -706,7 +691,7 @@ async def upload(bot: Client, msg: Message):
                 else:
                     emoji_message = await show_random_emojis(msg)
                     remaining_links = len(links) - count
-                    Show = f"**🍁 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗜𝗡𝗚 🍁**\n\n**📝ɴᴀᴍᴇ » ** `{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🗂️ɪɴᴅᴇx » {str(count)}/{len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**🔗ᴜʀʟ » ** `{url}`\n\n🤖𝗕𝗢𝗧 𝗠𝗔𝗗𝗘 𝗕𝗬 ➤ 𝗧𝗨𝗦𝗛𝗔𝗥\n\n🙂 चलो फिर से अजनबी बन जायें 🙂"
+                    Show = f"**Downloading**\n\n**>{name}\n\n🔗ᴛᴏᴛᴀʟ ᴜʀʟ » {len(links)}\n\n🌐ʀᴇᴍᴀɪɴɪɴɢ ᴜʀʟ » {remaining_links}\n\n❄ǫᴜᴀʟɪᴛʏ » {res}`\n\n**>{url}"
                     prog = await msg.reply_text(Show)
 
                     res_file = await helper.download_video(url, cmd, name)
@@ -718,10 +703,10 @@ async def upload(bot: Client, msg: Message):
                     time.sleep(1)
 
             except Exception as e:
-                error_details = f"‼️𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗶𝗻𝗴 𝗙𝗮𝗶𝗹𝗲𝗱‼️\n\n"\
-                   f"📝𝗡𝗮𝗺𝗲 » `{name}`\n\n"\
-                   f"🔗𝗨𝗿𝗹 » {url}\n\n"\
-                   f"⚠️𝗘𝗿𝗿𝗼𝗿 » `{str(e)}`"
+                error_details = f"‼️Downloading Failed‼️\n\n"\
+                   f"**>{name}\n\n"\
+                   f"**>{url}\n\n"\
+                   f"⚠️Error » `{str(e)}`"
     
                 await msg.reply_text(error_details)
                 logging.error(f"Download failed for {name}: {str(e)}")
@@ -732,20 +717,19 @@ async def upload(bot: Client, msg: Message):
 
     except Exception as e:
         await msg.reply_text(e)
-    await msg.reply_text(
-        f"`✨𝗕𝗔𝗧𝗖𝗛 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨\n\n"
-        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-        f"📛𝗜𝗻𝗱𝗲𝘅 𝗥𝗮𝗻𝗴𝗲 » ({raw_text} to {len(links)})\n"
-        f"📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 » {b_name}\n\n"
-        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-        f"✨𝗧𝗫𝗧 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨ : {len(links)}\n"
-        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-        f"🔹𝗩𝗶𝗱𝗲𝗼 » {video_count}\n🔹𝗣𝗱𝗳 » {pdf_count}\n🔹𝗜𝗺𝗴 » {img_count}\n🔹𝗭𝗶𝗽 » {zip_count}\n🔹𝗙𝗮𝗶𝗹𝗲𝗱 𝗨𝗿𝗹 » {failed_count}\n\n"
-        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-        f"✅𝗦𝗧𝗔𝗧𝗨𝗦 » 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗`"
-    )
-    await msg.reply_text(f"<pre><code>📥𝗘𝘅𝘁𝗿𝗮𝗰𝘁𝗲𝗱 𝗕𝘆 ➤『{CR}』</code></pre>")
-    await msg.reply_text(f"<pre><code>『😏𝗥𝗲𝗮𝗰𝘁𝗶𝗼𝗻 𝗞𝗼𝗻 𝗗𝗲𝗴𝗮😏』</code></pre>")
+#    await msg.reply_text(
+#        f"`✨𝗕𝗔𝗧𝗖𝗛 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨\n\n"
+#        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+#        f"📛𝗜𝗻𝗱𝗲𝘅 𝗥𝗮𝗻𝗴𝗲 » ({raw_text} to {len(links)})\n"
+#        f"📚𝗕𝗮𝘁𝗰𝗵 𝗡𝗮𝗺𝗲 » {b_name}\n\n"
+#        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+#        f"✨𝗧𝗫𝗧 𝗦𝗨𝗠𝗠𝗔𝗥𝗬✨ : {len(links)}\n"
+#        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+#        f"🔹𝗩𝗶𝗱𝗲𝗼 » {video_count}\n🔹𝗣𝗱𝗳 » {pdf_count}\n🔹𝗜𝗺𝗴 » {img_count}\n🔹𝗭𝗶𝗽 » {zip_count}\n🔹𝗙𝗮𝗶𝗹𝗲𝗱 𝗨𝗿𝗹 » {failed_count}\n\n"
+#        f"▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
+#        f"✅𝗦𝗧𝗔𝗧𝗨𝗦 » 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗`"
+#    )
+    await msg.reply_text(f"Download Completed")
 
 
 bot.run()
