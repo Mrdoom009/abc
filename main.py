@@ -483,7 +483,7 @@ async def upload(bot: Client, msg: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                cc = f">{name1}"
+                cc = f"{name1}"
                 # cpw = f">{str(count).zfill(3)}\n{name1}"
                 cyt = f"{name1}"
                 cpvod = f">{str(count).zfill(3)}\n{name1}"
