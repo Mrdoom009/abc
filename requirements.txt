@@ -19,7 +19,7 @@ google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
 pycryptodome==3.18.0
-pyrofork
+pyrofork==2.3.67
 tgcrypto
 PySocks==1.7.1
 python-dotenv==1.0.0
