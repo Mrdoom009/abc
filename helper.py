@@ -290,33 +290,39 @@ def time_name():
 
 
 async def download_video(url, cmd, name):
-    download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32"'
-    
+    referer = "https://mukeshpancholiofficial.classx.co.in/"
+
+    download_cmd = (
+        f'{cmd} '
+        f'-R 25 --fragment-retries 25 '
+        f'--external-downloader aria2c '
+        f'--downloader-args "aria2c: -x 16 -j 32" '
+        f'--add-header "Referer: {referer}" '
+        f'"{url}"'
+    )
+
     try:
         process = await asyncio.create_subprocess_shell(
             download_cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        
-        # Capture stdout and stderr
+
         stdout, stderr = await process.communicate()
-        
-        # Check for errors
+
         if process.returncode != 0:
             error_msg = stderr.decode().strip() or stdout.decode().strip()
             logging.error(f"Download failed for {name}: {error_msg}")
             return None
-        
-        # Check for downloaded files
+
         for ext in ["", ".webm", ".mkv", ".mp4", ".mp4.webm"]:
             file_path = f"{name}{ext}"
             if os.path.isfile(file_path):
                 return file_path
-        
+
         logging.warning(f"No valid file found for {name} after download")
         return None
-        
+
     except Exception as e:
         logging.error(f"Exception in download_video for {name}: {str(e)}")
         return None
