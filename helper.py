@@ -288,18 +288,25 @@ def time_name():
     current_time = now.strftime("%H%M%S")
     return f"{date} {current_time}.mp4"
 
-
 async def download_video(url, cmd, name):
     referer = "https://mukeshpancholiofficial.classx.co.in/"
+    safe_name = name.replace('"', "'")
+
+    # ✅ Add fallback if cmd is empty
+    cmd = cmd or "yt-dlp"
 
     download_cmd = (
         f'{cmd} '
         f'-R 25 --fragment-retries 25 '
+        f'--no-part '
         f'--external-downloader aria2c '
         f'--downloader-args "aria2c: -x 16 -j 32" '
         f'--add-header "Referer: {referer}" '
+        f'-o "{safe_name}.mp4" '
         f'"{url}"'
     )
+
+    print(f"[DEBUG] Final command: {download_cmd}")
 
     try:
         process = await asyncio.create_subprocess_shell(
@@ -309,16 +316,18 @@ async def download_video(url, cmd, name):
         )
 
         stdout, stderr = await process.communicate()
+        out = stdout.decode().strip()
+        err = stderr.decode().strip()
+        print(f"[yt-dlp STDOUT]: {out}")
+        print(f"[yt-dlp STDERR]: {err}")
 
         if process.returncode != 0:
-            error_msg = stderr.decode().strip() or stdout.decode().strip()
-            logging.error(f"Download failed for {name}: {error_msg}")
+            logging.error(f"Download failed for {name}: {err or out}")
             return None
 
-        for ext in ["", ".webm", ".mkv", ".mp4", ".mp4.webm"]:
-            file_path = f"{name}{ext}"
-            if os.path.isfile(file_path):
-                return file_path
+        file_path = f"{safe_name}.mp4"
+        if os.path.isfile(file_path):
+            return file_path
 
         logging.warning(f"No valid file found for {name} after download")
         return None
