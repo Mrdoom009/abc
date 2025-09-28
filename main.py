@@ -480,7 +480,7 @@ async def upload(bot: Client, msg: Message):
             if "jw-prod" in url:
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
             else:
-                cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
+                cmd = f'yt-dlp --add-header "Referer: https://player.akamai.net.in" -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
                 cc = f"{name1}"
